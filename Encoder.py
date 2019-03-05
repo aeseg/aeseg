@@ -326,3 +326,88 @@ class Encoder:
             output.append(labeled)
 
         return output
+
+    def __encode_using_median_treshold(self, temporal_prediction: np.array, **kwargs) -> list:
+        """
+        This algorithm is similar to the global median threshold but will
+        compute new threshold(s) (global or independent) for each files.
+
+        Args:
+            temporal_prediction (np.array): A 3-dimension numpy array (nb clip,
+                nb frame, nb class)
+            global (bool): If the threshold must be global (one for all
+            classes) or independent (one for each class)
+
+        Returns:
+            The result of the system under the form of a strong annotation text
+            where each line represent one time event
+        """
+
+        # Recover the kwargs arguments
+        _global = kwargs.get("global", False)
+
+        output = []
+
+        # Merging "hole" that are smaller than 200 ms
+        step_length = self.clip_length / temporal_prediction.shape[1] * 1000
+        max_hole_size = int(self.temporal_precision / step_length)
+
+        for clip in temporal_prediction:
+            labeled = dict()
+            _clip = clip.copy()
+
+            # compute unique threshold for this file
+            thresholds = np.array([curve[len(curve) // 2] for curve in clip.T])
+
+            if _global:
+                thresholds = [thresholds.mean()] * len(self.classes)
+
+            # Binarize using the given thresholds
+            if thresholds is not None:
+                _clip[_clip > thresholds] = 1
+                _clip[_clip <= thresholds] = 0
+
+            cls = 0
+            for binPredictionPerClass in _clip.T:
+                # convert the binarized list into a list of tuple representing
+                # the element and it's number of # occurrence. The order is
+                # conserved and the total sum should be equal to 10s
+
+                # first pass --> Fill the holes
+                for i in range(len(binPredictionPerClass) - max_hole_size):
+                    window = binPredictionPerClass[i: i + max_hole_size]
+
+                    if window[0] == window[-1] == 1:
+                        window[:] = [window[0]] * max_hole_size
+
+                # second pass --> split into segments
+                converted = []
+                cpt = 0
+                nb_segment = 0
+                previous_elt = None
+                for element in binPredictionPerClass:
+                    if previous_elt is None:
+                        previous_elt = element
+                        cpt += 1
+                        nb_segment = 1
+                        continue
+
+                    if element == previous_elt:
+                        cpt += 1
+
+                    else:
+                        converted.append((previous_elt, cpt))
+                        previous_elt = element
+                        nb_segment += 1
+                        cpt = 1
+
+                # case where the class is detect during the whole clip
+                #                 if nb_segment == 1:
+                converted.append((previous_elt, cpt))
+
+                labeled[cls] = converted.copy()
+                cls += 1
+
+            output.append(labeled)
+
+        return output
