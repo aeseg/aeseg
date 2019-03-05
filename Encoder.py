@@ -72,15 +72,15 @@ class Encoder:
         elif method == _methods[3]:
             encoder = self.__encodeUsingPrimitive
         elif method == _methods[4]:
-            encoder = self.__encodeUsingMeanThreshold
+            encoder = self.__encode_using_mean_threshold
         elif method == _methods[7]:
             encoder = self.__encode_using_gmean_threshold
         elif method == _methods[5]:
-            encoder = self.__encodeUsingMedianTreshold
+            encoder = self.__encode_using_mean_threshold()
         elif method == _methods[6]:
             encoder = self.__encodeUsingDynamicThreshold
         elif method == _methods[8]:
-            encoder = self.__encode_using_global_median_threshold
+            encoder = self.__encode_using_gmedian_threshold
         else:
             encoder = None
 
@@ -208,7 +208,7 @@ class Encoder:
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_global_median_threshold(self, temporalPrediction: np.array, **kwargs) -> list:
+    def __encode_using_gmedian_threshold(self, temporalPrediction: np.array, **kwargs) -> list:
         """
         Using all the temporal prediction, the mean of each curve and for
         each class is compted and will be choose as threshold. Then call the
@@ -242,3 +242,87 @@ class Encoder:
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
+    def __encode_using_mean_threshold(self, temporalPrediction: np.array, **kwargs) -> list:
+        """
+        This algorithm is similar to the global mean threshold but will compute
+        new threshold(s) (global or independent) for each files.
+
+        Args:
+            temporalPrediction (np.array): A 3-dimension numpy array (<nb clip>,
+                <nb frame>, <nb class>)
+            global (bool): If the threshold must be global (one for all
+            classes) or independent (one for each class)
+
+        Returns:
+            the result of the system under the form of a strong annotation text
+            where each line represent on timed event
+        """
+
+        # Recover the kwargs arguments
+        _global = kwargs.get("global", False)
+
+        output = []
+
+        # Merging "hole" that are smaller than 200 ms
+        step_length = self.clip_length / temporalPrediction.shape[1] * 1000
+        max_hole_size = int(self.temporal_precision / step_length)
+
+        for clip in temporalPrediction:
+            labeled = dict()
+            _clip = clip.copy()
+
+            # compute unique threshold for this file globally or independent
+            thresholds = np.array([curve.mean() for curve in _clip.T])
+
+            if _global:
+                thresholds = [thresholds.mean()] * len(self.classes)
+
+            # Binarize using the given thresholds
+            if thresholds is not None:
+                _clip[_clip > thresholds] = 1
+                _clip[_clip <= thresholds] = 0
+
+            cls = 0
+            for binPredictionPerClass in _clip.T:
+                # convert the binarized list into a list of tuple representing
+                # the element and it's number of # occurrence. The order is
+                # conserved and the total sum should be equal to 10s
+
+                # first pass --> Fill the holes
+                for i in range(len(binPredictionPerClass) - max_hole_size):
+                    window = binPredictionPerClass[i: i + max_hole_size]
+
+                    if window[0] == window[-1] == 1:
+                        window[:] = [window[0]] * max_hole_size
+
+                # second pass --> split into segments
+                converted = []
+                cpt = 0
+                nb_segment = 0
+                previous_elt = None
+                for element in binPredictionPerClass:
+                    if previous_elt is None:
+                        previous_elt = element
+                        cpt += 1
+                        nb_segment = 1
+                        continue
+
+                    if element == previous_elt:
+                        cpt += 1
+
+                    else:
+                        converted.append((previous_elt, cpt))
+                        previous_elt = element
+                        nb_segment += 1
+                        cpt = 1
+
+                # case where the class is detect during the whole clip
+                #                 if nb_segment == 1:
+                converted.append((previous_elt, cpt))
+
+                labeled[cls] = converted.copy()
+                cls += 1
+
+            output.append(labeled)
+
+        return output
