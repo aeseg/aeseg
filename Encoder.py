@@ -26,7 +26,7 @@ class Encoder:
         self.nb_frame = None
 
     def encode(self, temporal_prediction: np.array, method: str = "threshold",
-               smooth: str = None, **kwargs) -> str:
+               smooth: str = None, **kwargs) -> list:
         """Perform the localization of the sound event present in the file.
 
         Using the temporal prediction provided y the last step of the system,
@@ -54,8 +54,8 @@ class Encoder:
             the width of the segment (number of frame)
         """
         # parameters verification
-        _methods = ["threshold", "hysteresis", "derivative", "primitive",
-                    "mean_threshold", "median_threshold", "dynamic_threshold",
+        _methods = ["threshold", "hysteresis", "derivative", "mean_threshold",
+                    "median_threshold", "dynamic_threshold",
                     "global_mean_threshold", "global_median_threshold"]
 
         if method not in _methods:
@@ -63,6 +63,8 @@ class Encoder:
                              (method, _methods))
 
         # Depending on the method selected, the proper function will be selected
+        encoder = None
+
         if method == _methods[0]:
             encoder = self.__encode_using_threshold
         elif method == _methods[2]:
@@ -70,19 +72,15 @@ class Encoder:
         elif method == _methods[1]:
             encoder = self.__encode_using_hysteresis
         elif method == _methods[3]:
-            encoder = self.__encodeUsingPrimitive
-        elif method == _methods[4]:
-            encoder = self.__encode_using_mean_threshold
-        elif method == _methods[7]:
-            encoder = self.__encode_using_gmean_threshold
-        elif method == _methods[5]:
             encoder = self.__encode_using_mean_threshold
         elif method == _methods[6]:
-            encoder = self.__encodeUsingDynamicThreshold
-        elif method == _methods[8]:
+            encoder = self.__encode_using_gmean_threshold
+        elif method == _methods[4]:
+            encoder = self.__encode_using_median_treshold
+        elif method == _methods[5]:
+            encoder = self.__encode_using_dynamic_threshold
+        elif method == _methods[7]:
             encoder = self.__encode_using_gmedian_threshold
-        else:
-            encoder = None
 
         # Apply smoothing if requested
         if smooth is not None:
@@ -116,8 +114,8 @@ class Encoder:
                 clip>, <nb frame>, <nb class>)
             rising (float): Must be between 0 and 1, rising threshold. When the
             slope is steeper
-            decreasing (float): Must be between 0 and 1, decreasing threshold that
-            specifies the end of the current valid segment
+            decreasing (float): Must be between 0 and 1, decreasing threshold
+            that specifies the end of the current valid segment.
             window_size (int): size of the processing window
             high (float): minimum prediction value that trigger a valid
             segment, even if the condition are not fulfill.
@@ -143,7 +141,7 @@ class Encoder:
                 segments = []
                 segment = [0.0, 0]
                 for i in range(len(padded_prediction_per_class) - window_size):
-                    window = padded_prediction_per_class[i:i+window_size]
+                    window = padded_prediction_per_class[i:i + window_size]
                     slope = (window[-1] - window[0]) / window_size
 
                     # first element
@@ -362,7 +360,8 @@ class Encoder:
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_gmedian_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
+    def __encode_using_gmedian_threshold(self, temporal_prediction: np.array,
+                                         **kwargs) -> list:
         """Using all the temporal prediction, the mean of each curve and for
         each class is compted and will be choose as threshold. Then call the
         `__encoder_using_threshold` function to apply it.
@@ -377,9 +376,9 @@ class Encoder:
 
         total_thresholds = []
         for clip in temporal_prediction:
-
             # compute unique threshold for this file
-            total_thresholds.append( [curve[len(curve) // 2] for curve in clip.T] )
+            total_thresholds.append(
+                [curve[len(curve) // 2] for curve in clip.T])
 
         total_thresholds = np.array(total_thresholds)
 
@@ -394,7 +393,8 @@ class Encoder:
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_mean_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
+    def __encode_using_mean_threshold(self, temporal_prediction: np.array,
+                                      **kwargs) -> list:
         """This algorithm is similar to the global mean threshold but will
         compute new threshold(s) (global or independent) for each files.
 
@@ -477,7 +477,8 @@ class Encoder:
 
         return output
 
-    def __encode_using_median_treshold(self, temporal_prediction: np.array, **kwargs) -> list:
+    def __encode_using_median_treshold(self, temporal_prediction: np.array,
+                                       **kwargs) -> list:
         """This algorithm is similar to the global median threshold but will
         compute new threshold(s) (global or independent) for each files.
 
@@ -559,3 +560,130 @@ class Encoder:
             output.append(labeled)
 
         return output
+
+    def __encode_using_dynamic_threshold(self, temporal_prediction: np.array,
+                                         **kwargs) -> list:
+        """
+        Args:
+            temporal_prediction (np.array):
+            **kwargs:
+        """
+        raise NotImplementedError()
+
+    # ==========================================================================
+    #
+    #       SMOOTHING AND UTILITIES
+    #
+    # ==========================================================================
+    def __pad(self, array: np.array, window_size: int,
+              method: str = "same") -> np.array:
+        """Pad and array using the methods given and a window_size.
+
+        Args:
+            array (np.array): the array to pad
+            window_size (int): the size of the working window
+            method (str): methods of padding, two available "same" | "reflect"
+
+        Returns:
+            the padded array
+        """
+
+        output = array
+
+        if method == "same":
+            missing = int(window_size / 2)
+            first = np.array([array[0]] * missing)
+            last = np.array([array[-1]] * missing)
+
+            output = np.concatenate((first, array, last))
+
+        elif method == "valid":
+            output = array
+
+        elif method == "null":
+            missing = int(window_size / 2)
+            start, end = [0] * missing, [0] * missing
+
+            output = np.concatenate((start, array, end))
+
+        return output
+
+    # ===============================================================================
+    #
+    #     SMOOTHING FUNCTIONS:
+    #
+    # ===============================================================================
+    def __smooth(self, temporal_prediction: np.array,
+                 method: str = "smoothMovingAvg",
+                 **kwargs) -> np.array:
+        """For smoothing the curve of the prediction curves.
+
+        Args:
+            temporal_prediction (np.array): The temporalPrediction of the second
+                model (TimeDistributed Dense output)
+            method (str): The algorithm to use for smoothing the curves
+            kwargs: See argument list for the smoothing algorithm
+        """
+
+        # Check if methods asked exist
+        _methods = ["smoothMovingAvg", "smoothMovingMedian"]
+        if method not in _methods:
+            raise ValueError("Method %s doesn't exist. Only %s available" %
+                             (method, _methods))
+
+        # Create smoother (select the algorithm)
+        if method == _methods[0]:
+            smoother = self.__smooth_moving_avg
+        elif method == _methods[1]:
+            smoother = self.__smooth_moving_median
+        else:
+            return
+
+        return smoother(temporal_prediction, **kwargs)
+
+    def __smooth_moving_median(self, temporal_prediction: np.array,
+                               windows_len: int = 11, **kwargs):
+        """
+        Args:
+            temporal_prediction (np.array):
+            windows_len (int):
+            **kwargs:
+        """
+        raise NotImplementedError()
+
+    def __smooth_moving_avg(self, temporal_prediction: np.array,
+                            window_len: int = 5, padding: str = "same",
+                            **kwargs):
+        """
+        Args:
+            temporal_prediction (np.array):
+            window_len (int): The size of the smoothing window
+            padding (str): The padding mode to use
+        """
+
+        def smooth(data, window_len=11):
+            window_len = int(window_len)
+
+            if window_len < 3:
+                return data
+
+            s = np.r_[
+                2 * data[0] - data[window_len - 1::-1],
+                data,
+                2 * data[-1] - data[-1:-window_len:-1]
+            ]
+
+            w = np.ones(window_len, 'd')
+            y = np.convolve(w / w.sum(), s, mode=padding)
+            return y[window_len:-window_len + 1]
+
+        # core
+        smoothed_temporal_prediction = temporal_prediction.copy()
+
+        for clip_ind in range(len(smoothed_temporal_prediction)):
+            clip = smoothed_temporal_prediction[clip_ind]
+
+            for cls_ind in range(len(clip.T)):
+                clip.T[cls_ind] = smooth(clip.T[cls_ind], window_len)
+
+        return smoothed_temporal_prediction
