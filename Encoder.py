@@ -68,7 +68,7 @@ class Encoder:
         elif method == _methods[2]:
             encoder = self.__encodeUsingDerivative
         elif method == _methods[1]:
-            encoder = self.__encodeUsingHysteresis
+            encoder = self.__encode_using_hysteresis
         elif method == _methods[3]:
             encoder = self.__encodeUsingPrimitive
         elif method == _methods[4]:
@@ -96,6 +96,72 @@ class Encoder:
 
         # Execute the selected segmentation algorithm and recover its results
         return encoder(temporal_prediction, **kwargs)
+
+    def __encode_using_hysteresis(self, temporal_prediction: np.array,
+                                  **kwargs) -> list:
+        """
+        The hysteresis based segmentation algorithm require two threhsolds.
+        A high value to decided when the segment should start and a low value
+        to decided when to finish the segment. It perform better when the
+        temporal prediction is noisy
+
+        Args:
+            temporal_prediction (np.array): A 3-dimension numpy array (<nb clip>,
+                <nb frame>, <nb class>)
+            kwargs: Extra arguments - "high" and "low" (thresholds for the
+                hysteresis)
+
+        Returns:
+            the result of the system under the form of a strong annotation text
+            where each line represent on timed event
+        """
+        low = kwargs["low"] if "low" in kwargs.keys() else 0.4
+        high = kwargs["high"] if "high" in kwargs.keys() else 0.6
+        prediction = temporal_prediction
+
+        output = []
+
+        for clip in prediction:
+            labeled = dict()
+
+            cls = 0
+            for prediction_per_class in clip.T:
+                converted = list()
+                segment = [0, 0]
+                nb_segment = 1
+                for i in range(len(prediction_per_class)):
+                    element = prediction_per_class[i]
+
+                    # first element
+                    if i == 0:
+                        segment = [1.0, 1] if element > high else [0.0, 1]
+
+                        # then
+                    if element > high:
+                        if segment[0] == 1:
+                            segment[1] += 1
+                        else:
+                            converted.append(segment)
+                            nb_segment += 1
+                            segment = [1.0, 1]
+                    elif low <= element:
+                        segment[1] += 1
+                    else:
+                        if segment[0] == 0:
+                            segment[1] += 1
+                        else:
+                            converted.append(segment)
+                            nb_segment += 1
+                            segment = [0.0, 0]
+
+                converted.append(segment)
+
+                labeled[cls] = converted.copy()
+                cls += 1
+
+            output.append(labeled)
+
+        return output
 
     def __encode_using_threshold(self, temporal_prediction: np.array,
                                  **kwargs) -> list:
@@ -208,14 +274,14 @@ class Encoder:
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_gmedian_threshold(self, temporalPrediction: np.array, **kwargs) -> list:
+    def __encode_using_gmedian_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
         """
         Using all the temporal prediction, the mean of each curve and for
         each class is compted and will be choose as threshold. Then call the
         `__encoder_using_threshold` function to apply it.
 
         Args:
-            temporalPrediction (np.array):
+            temporal_prediction (np.array):
             global (bool): If the threshold must be global (one for all
             classes) or independent (one for each class)
         """
@@ -224,7 +290,7 @@ class Encoder:
         _global = kwargs.get("global", False)
 
         total_thresholds = []
-        for clip in temporalPrediction:
+        for clip in temporal_prediction:
 
             # compute unique threshold for this file
             total_thresholds.append( [curve[len(curve) // 2] for curve in clip.T] )
@@ -233,22 +299,22 @@ class Encoder:
 
         if _global:
             return self.__encode_using_threshold(
-                temporalPrediction,
+                temporal_prediction,
                 thresholds=total_thresholds.mean(axis=0),
                 **kwargs)
         else:
             return self.__encode_using_threshold(
-                temporalPrediction,
+                temporal_prediction,
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_mean_threshold(self, temporalPrediction: np.array, **kwargs) -> list:
+    def __encode_using_mean_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
         """
         This algorithm is similar to the global mean threshold but will compute
         new threshold(s) (global or independent) for each files.
 
         Args:
-            temporalPrediction (np.array): A 3-dimension numpy array (<nb clip>,
+            temporal_prediction (np.array): A 3-dimension numpy array (<nb clip>,
                 <nb frame>, <nb class>)
             global (bool): If the threshold must be global (one for all
             classes) or independent (one for each class)
@@ -264,10 +330,10 @@ class Encoder:
         output = []
 
         # Merging "hole" that are smaller than 200 ms
-        step_length = self.clip_length / temporalPrediction.shape[1] * 1000
+        step_length = self.clip_length / temporal_prediction.shape[1] * 1000
         max_hole_size = int(self.temporal_precision / step_length)
 
-        for clip in temporalPrediction:
+        for clip in temporal_prediction:
             labeled = dict()
             _clip = clip.copy()
 
