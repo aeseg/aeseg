@@ -179,12 +179,12 @@ class Encoder:
         """
         Using all the temporal prediction, the mean of each curve and for
         each class is computed and will be choose as threshold. Then call the
-        ``__encode_using_threshold` function.
+        `__encode_using_threshold` function to apply it.
 
         Args:
             temporal_prediction (np.array):
-            global (bool): If the threhsold must be global (one for all
-            classes) or independant (one for each class)
+            global (bool): If the threshold must be global (one for all
+            classes) or independent (one for each class)
         """
 
         # Recover the kwargs arguments
@@ -205,6 +205,40 @@ class Encoder:
         else:
             return self.__encode_using_threshold(
                 temporal_prediction,
+                thresholds=[total_thresholds.mean()] * len(self.classes),
+                **kwargs)
+
+    def __encode_using_global_median_threshold(self, temporalPrediction: np.array, **kwargs) -> list:
+        """
+        Using all the temporal prediction, the mean of each curve and for
+        each class is compted and will be choose as threshold. Then call the
+        `__encoder_using_threshold` function to apply it.
+
+        Args:
+            temporalPrediction (np.array):
+            global (bool): If the threshold must be global (one for all
+            classes) or independent (one for each class)
+        """
+
+        # Recover the kwargs arguments
+        _global = kwargs.get("global", False)
+
+        total_thresholds = []
+        for clip in temporalPrediction:
+
+            # compute unique threshold for this file
+            total_thresholds.append( [curve[len(curve) // 2] for curve in clip.T] )
+
+        total_thresholds = np.array(total_thresholds)
+
+        if _global:
+            return self.__encode_using_threshold(
+                temporalPrediction,
+                thresholds=total_thresholds.mean(axis=0),
+                **kwargs)
+        else:
+            return self.__encode_using_threshold(
+                temporalPrediction,
                 thresholds=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
