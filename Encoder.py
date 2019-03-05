@@ -74,7 +74,7 @@ class Encoder:
         elif method == _methods[4]:
             encoder = self.__encodeUsingMeanThreshold
         elif method == _methods[7]:
-            encoder = self.__encode_using_global_mean_threshold
+            encoder = self.__encode_using_gmean_threshold
         elif method == _methods[5]:
             encoder = self.__encodeUsingMedianTreshold
         elif method == _methods[6]:
@@ -173,3 +173,38 @@ class Encoder:
             output.append(labeled)
 
         return output
+
+    def __encode_using_gmean_threshold(self, temporal_prediction: np.array,
+                                       **kwargs) -> list:
+        """
+        Using all the temporal prediction, the mean of each curve and for
+        each class is computed and will be choose as threshold. Then call the
+        ``__encode_using_threshold` function.
+
+        Args:
+            temporal_prediction (np.array):
+            global (bool): If the threhsold must be global (one for all
+            classes) or independant (one for each class)
+        """
+
+        # Recover the kwargs arguments
+        _global = kwargs.get("global", False)
+
+        total_thresholds = []
+
+        for clip in temporal_prediction:
+            total_thresholds.append([curve.mean() for curve in clip.T])
+
+        total_thresholds = np.array(total_thresholds)
+
+        if _global:
+            return self.__encode_using_threshold(
+                temporal_prediction,
+                thresholds=total_thresholds.mean(axis=0),
+                **kwargs)
+        else:
+            return self.__encode_using_threshold(
+                temporal_prediction,
+                thresholds=[total_thresholds.mean()] * len(self.classes),
+                **kwargs)
+
