@@ -661,21 +661,21 @@ class Encoder:
             padding (str): The padding mode to use
         """
 
-        def smooth(data, window_len=11):
-            window_len = int(window_len)
+        def smooth(data, _window_len):
+            _window_len = int(_window_len)
 
             if window_len < 3:
                 return data
 
             s = np.r_[
-                2 * data[0] - data[window_len - 1::-1],
+                2 * data[0] - data[_window_len - 1::-1],
                 data,
-                2 * data[-1] - data[-1:-window_len:-1]
+                2 * data[-1] - data[-1:-_window_len:-1]
             ]
 
-            w = np.ones(window_len, 'd')
+            w = np.ones(_window_len, 'd')
             y = np.convolve(w / w.sum(), s, mode=padding)
-            return y[window_len:-window_len + 1]
+            return y[_window_len:-_window_len + 1]
 
         # core
         smoothed_temporal_prediction = temporal_prediction.copy()
