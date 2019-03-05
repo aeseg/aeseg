@@ -66,7 +66,7 @@ class Encoder:
         if method == _methods[0]:
             encoder = self.__encode_using_threshold
         elif method == _methods[2]:
-            encoder = self.__encodeUsingDerivative
+            encoder = self.__encode_using_derivative
         elif method == _methods[1]:
             encoder = self.__encode_using_hysteresis
         elif method == _methods[3]:
@@ -76,7 +76,7 @@ class Encoder:
         elif method == _methods[7]:
             encoder = self.__encode_using_gmean_threshold
         elif method == _methods[5]:
-            encoder = self.__encode_using_mean_threshold()
+            encoder = self.__encode_using_mean_threshold
         elif method == _methods[6]:
             encoder = self.__encodeUsingDynamicThreshold
         elif method == _methods[8]:
@@ -97,17 +97,110 @@ class Encoder:
         # Execute the selected segmentation algorithm and recover its results
         return encoder(temporal_prediction, **kwargs)
 
-    def __encode_using_hysteresis(self, temporal_prediction: np.array,
-                                  **kwargs) -> list:
+    def __encode_using_derivative(self, temporal_prediction: np.array,
+                                  rising: float = 0.5, decreasing: float = -0.5,
+                                  window_size: int = 5, high: float = 0.8,
+                                  padding: str = "same") -> list:
         """
-        The hysteresis based segmentation algorithm require two threhsolds.
-        A high value to decided when the segment should start and a low value
-        to decided when to finish the segment. It perform better when the
-        temporal prediction is noisy
+        The derivative create segment based on the intensity of the variation
+        of the temporal prediction curve. If the prediction rise above a certain
+        threshold `rising` then a valid segment start. If it decrease faster
+        than the `decreasing` threshold, then a valid segment finish. If the
+        prediction start with a high value, of rise slowly but high, then an
+        absolute (and global) threshold `high` is used. (it works like a normal
+        threhsold)
+
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array (<nb clip>,
-                <nb frame>, <nb class>)
+            temporal_prediction (np.array): A 3-dimension numpy array (<nb
+                clip>, <nb frame>, <nb class>)
+            rising (float): Must be between 0 and 1, rising threshold. When the
+            slope is steeper
+            decreasing (float): Must be between 0 and 1, decreasing threshold that
+            specifies the end of the current valid segment
+            window_size (int): size of the processing window
+            high (float): minimum prediction value that trigger a valid
+            segment, even if the condition are not fulfill.
+            padding (str): The padding method to used on the curves
+
+        Returns:
+            The result of the system under the form of a strong annotation text
+            where each represent on timed event
+        """
+
+        output = []
+
+        for clip in temporal_prediction:
+            cls = 0
+            labeled = dict()
+
+            for prediction_per_class in clip.T:
+                padded_prediction_per_class = self.__pad(prediction_per_class,
+                                                         window_size,
+                                                         method=padding)
+
+                nb_segment = 1
+                segments = []
+                segment = [0.0, 0]
+                for i in range(len(padded_prediction_per_class) - window_size):
+                    window = padded_prediction_per_class[i:i+window_size]
+                    slope = (window[-1] - window[0]) / window_size
+
+                    # first element
+                    if i == 0:
+                        segment = [1.0, 1] if window[0] > high else [0.0, 1]
+
+                    # if on "high" segment
+                    if segment[0] == 1:
+
+                        # if above high threshol
+                        if window[0] > high:
+                            segment[1] += 1
+
+                        else:
+                            # if decreasing threshold is reach
+                            if slope < decreasing:
+                                segments.append(segment)
+                                nb_segment += 1
+                                segment = [0.0, 1]
+                            else:
+                                segment[1] += 1
+
+                    # if on "low" segment
+                    else:
+
+                        # if above high threshold
+                        if window[0] > high:
+                            segments.append(segment)
+                            nb_segment += 1
+                            segment = [1.0, 1]
+
+                        else:
+                            if slope > rising:
+                                segments.append(segment)
+                                nb_segment += 1
+                                segment = [1.0, 1]
+                            else:
+                                segment[1] += 1
+
+                segments.append(segment.copy())
+
+                labeled[cls] = segments
+                cls += 1
+
+            output.append(labeled)
+        return output
+
+    def __encode_using_hysteresis(self, temporal_prediction: np.array,
+                                  **kwargs) -> list:
+        """The hysteresis based segmentation algorithm require two threhsolds. A
+        high value to decided when the segment should start and a low value to
+        decided when to finish the segment. It perform better when the temporal
+        prediction is noisy
+
+        Args:
+            temporal_prediction (np.array): A 3-dimension numpy array (<nb
+                clip>, <nb frame>, <nb class>)
             kwargs: Extra arguments - "high" and "low" (thresholds for the
                 hysteresis)
 
@@ -165,15 +258,12 @@ class Encoder:
 
     def __encode_using_threshold(self, temporal_prediction: np.array,
                                  **kwargs) -> list:
-        """
-        A basic threshold algorithm. Each value that are above the threshold
+        """A basic threshold algorithm. Each value that are above the threshold
         will be part of a valid segment, an invalid one otherwise.
 
         Args:
             temporal_prediction (np.array):
-            thresholds (list): The list of threshold to apply. It must
-            contain as much threshold that there is classes. (one threshold for
-            each class.
+            **kwargs:
         """
         output = []
 
@@ -242,15 +332,13 @@ class Encoder:
 
     def __encode_using_gmean_threshold(self, temporal_prediction: np.array,
                                        **kwargs) -> list:
-        """
-        Using all the temporal prediction, the mean of each curve and for
+        """Using all the temporal prediction, the mean of each curve and for
         each class is computed and will be choose as threshold. Then call the
         `__encode_using_threshold` function to apply it.
 
         Args:
             temporal_prediction (np.array):
-            global (bool): If the threshold must be global (one for all
-            classes) or independent (one for each class)
+            **kwargs:
         """
 
         # Recover the kwargs arguments
@@ -275,15 +363,13 @@ class Encoder:
                 **kwargs)
 
     def __encode_using_gmedian_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
-        """
-        Using all the temporal prediction, the mean of each curve and for
+        """Using all the temporal prediction, the mean of each curve and for
         each class is compted and will be choose as threshold. Then call the
         `__encoder_using_threshold` function to apply it.
 
         Args:
             temporal_prediction (np.array):
-            global (bool): If the threshold must be global (one for all
-            classes) or independent (one for each class)
+            **kwargs:
         """
 
         # Recover the kwargs arguments
@@ -309,15 +395,13 @@ class Encoder:
                 **kwargs)
 
     def __encode_using_mean_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
-        """
-        This algorithm is similar to the global mean threshold but will compute
-        new threshold(s) (global or independent) for each files.
+        """This algorithm is similar to the global mean threshold but will
+        compute new threshold(s) (global or independent) for each files.
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array (<nb clip>,
-                <nb frame>, <nb class>)
-            global (bool): If the threshold must be global (one for all
-            classes) or independent (one for each class)
+            temporal_prediction (np.array): A 3-dimension numpy array (<nb
+                clip>, <nb frame>, <nb class>)
+            **kwargs:
 
         Returns:
             the result of the system under the form of a strong annotation text
@@ -394,15 +478,13 @@ class Encoder:
         return output
 
     def __encode_using_median_treshold(self, temporal_prediction: np.array, **kwargs) -> list:
-        """
-        This algorithm is similar to the global median threshold but will
+        """This algorithm is similar to the global median threshold but will
         compute new threshold(s) (global or independent) for each files.
 
         Args:
             temporal_prediction (np.array): A 3-dimension numpy array (nb clip,
                 nb frame, nb class)
-            global (bool): If the threshold must be global (one for all
-            classes) or independent (one for each class)
+            **kwargs:
 
         Returns:
             The result of the system under the form of a strong annotation text
