@@ -1,0 +1,163 @@
+import sed_eval
+import dcase_util as dcu
+
+def evaluator(reference_event_list, estimated_event_list,
+              t_collar: float = 0.200,
+              percentage_of_length: float = 0.2
+              ) -> sed_eval.sound_event.EventBasedMetrics:
+    #TODO In the sed_eval library, EventBasedMetrics have more attribute.
+    """
+    Return an evaluator function depending on the type of the data provided.
+    Different type of data are possible to use. Sed_eval event based metrics.
+
+    # Exemple
+    # A list of string
+    estimated_event_list = [
+        ["file_1.wav\t1.00\t2.00\dog"],
+        ["file_2.wav\t1.56\t1.92\cat"]
+    ]
+
+    # A string
+    estimated_event_list = "file_1.wav\t1.00\t2.00\dog\n" + \
+        "file_2.wav\t1.56\t1.92\cat"
+
+    Args:
+        reference_event_list: The ground truth
+        estimated_event_list: The prediction (results of the encode function)
+        t_collar (float): Time collar used when evaluating validity of the onset
+        and offset, in seconds. Default value 0.2
+        percentage_of_length (float): Second condition, percentage of the
+        length within which the estimated offset has to be in order to be
+        consider valid estimation. Default value 0.2
+
+    Returns:
+        EventBasedMetrics: **event_based_metric**
+    """
+
+    # Convert the data into dcase_util.containers.MetaDataContainer
+    estimated_event_list = convert_to_mdc(estimated_event_list)
+    reference_event_list = convert_to_mdc(reference_event_list)
+
+    event_based_metric = sed_eval.sound_event.EventBasedMetrics(
+        event_label_list=reference_event_list.unique_event_labels,
+        t_collar=t_collar,
+        percentage_of_length=percentage_of_length,
+    )
+
+    return event_based_metric.evaluate(
+        reference_event_list, estimated_event_list
+    )
+
+
+# ==============================================================================
+#
+#       CONVERTION FUNCTIONS
+#
+# ==============================================================================
+def __detect_separator(exemple: str) -> str:
+    """
+    Automatically detect the separator use into a string and return it
+
+    Args:
+        A String exemple
+
+    Returns:
+        separator character
+    """
+    known_sep = [",", ";", ":", "\t"]
+
+    for sep in known_sep:
+        if len(exemple.split(sep)) > 0:
+            return sep
+    return "\t"
+
+
+def convert_to_mdc(event_list) -> dcu.containers.MetaDataContainer:
+    """
+    Since the user can provide the reference and estimates event list in
+    different format, We must convert them into MetaDataContainer.
+
+    Args:
+        event_list: The event list into one of the possible format
+
+    Returns:
+        MetaDataContainer
+    """
+    to_check = event_list
+
+    if isinstance(to_check, dcu.containers.MetaDataContainer):
+        estimated = to_check
+
+    # list of string
+    elif isinstance(to_check, list):
+        if isinstance(to_check[0], str):
+            estimated = list_string_to_mdc(event_list)
+
+    # A string
+    elif isinstance(to_check, str):
+        estimated = string_to_mdc(event_list)
+
+    return estimated
+
+def string_to_mdc(event_strings: str) -> dcu.containers.MetaDataContainer:
+    """
+    If the data is under the form of a long string with several line (\n).
+    The information contain in each line must be separated using one of this
+    separator : ",", ";", "\t". It will be automatically detected.
+
+    Args:
+         event_strings (str): The string to convert into a MetaDataContainer
+
+
+    Returns:
+        MetaDataContainer
+    """
+    list_json = []
+
+    # Automatically find the separator
+    sep = __detect_separator(event_strings.split("\n")[0])
+
+    for line in event_strings.split("\n"):
+        info = line.split(sep)
+
+        list_json.append( {
+            "file": info[0],
+            "event_onset": info[1],
+            "event_offset": info[2],
+            "event_label": info[3]
+        })
+
+    return dcu.containers.MetaDataContainer(list_json)
+
+
+def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
+    """
+    If the data is under the form of a list of strings. The information contain
+    in each line must be separated using one of this separator : ",", ";",
+    "\t". It will be automatically detected.
+
+    Args:
+         event_strings (str): The string to convert into a MetaDataContainer
+
+
+    Returns:
+        MetaDataContainer
+    """
+    list_json = []
+
+    # Automatically find the separator
+    sep = __detect_separator(event_list[0])
+
+    for line in event_list:
+        info = line.split(sep)
+
+        list_json.append( {
+            "file": info[0],
+            "event_onset": info[1],
+            "event_offset": info[2],
+            "event_label": info[3]
+        })
+
+    return dcu.containers.MetaDataContainer(list_json)
+
+
