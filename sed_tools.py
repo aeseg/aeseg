@@ -1,11 +1,12 @@
 import sed_eval
 import dcase_util as dcu
 
+
 def evaluator(reference_event_list, estimated_event_list,
               t_collar: float = 0.200,
               percentage_of_length: float = 0.2
               ) -> sed_eval.sound_event.EventBasedMetrics:
-    #TODO In the sed_eval library, EventBasedMetrics have more attribute.
+    # TODO In the sed_eval library, EventBasedMetrics have more attribute.
     """
     Return an evaluator function depending on the type of the data provided.
     Different type of data are possible to use. Sed_eval event based metrics.
@@ -83,21 +84,25 @@ def convert_to_mdc(event_list) -> dcu.containers.MetaDataContainer:
     Returns:
         MetaDataContainer
     """
-    to_check = event_list
+    estimated = event_list
 
-    if isinstance(to_check, dcu.containers.MetaDataContainer):
-        estimated = to_check
+    if isinstance(estimated, dcu.containers.MetaDataContainer):
+        estimated = estimated
 
     # list of string
-    elif isinstance(to_check, list):
-        if isinstance(to_check[0], str):
+    elif isinstance(estimated, list):
+        if isinstance(estimated[0], str):
             estimated = list_string_to_mdc(event_list)
 
     # A string
-    elif isinstance(to_check, str):
+    elif isinstance(estimated, str):
         estimated = string_to_mdc(event_list)
 
+    else:
+        raise ValueError("This format %s can't be used. " % type(event_list))
+
     return estimated
+
 
 def string_to_mdc(event_strings: str) -> dcu.containers.MetaDataContainer:
     """
@@ -120,7 +125,7 @@ def string_to_mdc(event_strings: str) -> dcu.containers.MetaDataContainer:
     for line in event_strings.split("\n"):
         info = line.split(sep)
 
-        list_json.append( {
+        list_json.append({
             "file": info[0],
             "event_onset": info[1],
             "event_offset": info[2],
@@ -137,7 +142,7 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
     "\t". It will be automatically detected.
 
     Args:
-         event_strings (str): The string to convert into a MetaDataContainer
+         event_list (str): The string to convert into a MetaDataContainer
 
 
     Returns:
@@ -151,7 +156,7 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
     for line in event_list:
         info = line.split(sep)
 
-        list_json.append( {
+        list_json.append({
             "file": info[0],
             "event_onset": info[1],
             "event_offset": info[2],
@@ -159,5 +164,3 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
         })
 
     return dcu.containers.MetaDataContainer(list_json)
-
-
