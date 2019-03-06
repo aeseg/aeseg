@@ -2,3 +2,5 @@ Encoder_copy.py
 build/
 source/
 .idea/
+optimization_pour_thomas.py
+evaluation_measures.py
