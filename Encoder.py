@@ -2,7 +2,8 @@ import numpy as np
 
 
 class Encoder:
-    """In a sound event detection task, the output of the prediction model is
+    """
+    In a sound event detection task, the output of the prediction model is
     often a temporal prediction. Different segmentation algorithm exist in order
     to translate this curves into a list of segment.
     """
@@ -24,6 +25,39 @@ class Encoder:
         # Attribute that are not initialize with the constructor
         self.frame_length = None
         self.nb_frame = None
+        self.class_correspondence = dict(zip(classes, range(len(classes))))
+        self.class_correspondence_reverse = dict(zip(range(len(classes)), classes))
+
+    def parse(self, all_segments: list, test_files_name: list) -> str:
+        """
+        Transform a list of segment into a string ready for evaluation with
+        sed_eval.
+
+        Args:
+            all_segments (list): a list of dict of 10 key. the list length is
+                equal to the number of file, the dict number
+            test_files_name (list): The list of the file names in the same
+            order than the temporal prediction used to perform the segmentation
+        """
+        output = ""
+
+        for clipIndex in range(len(all_segments)):
+            clip = all_segments[clipIndex]
+
+            for cls in clip:
+                start = 0
+
+                for segment in clip[cls]:
+                    if segment[0] == 1.0:
+                        output += "%s\t%f\t%f\t%s\n" % (
+                            test_files_name[clipIndex],
+                            start * self.frame_length,
+                            (start + segment[1]) * self.frame_length,
+                            self.class_correspondence_reverse[cls]
+                        )
+                    start += segment[1]
+
+        return output
 
     def encode(self, temporal_prediction: np.array, method: str = "threshold",
                smooth: str = None, **kwargs) -> list:
