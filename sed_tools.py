@@ -164,3 +164,41 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
         })
 
     return dcu.containers.MetaDataContainer(list_json)
+
+
+
+if __name__=='__main__':
+    import numpy as np
+    from Encoder import Encoder
+
+    # load baseline data
+    strong_prediction_path = "/home/lcances/sync/Documents_sync/Projet" \
+                        "/Threshold_optimization/data/baseline_strong_prediction.npy"
+    strong_prediction = np.load(strong_prediction_path)
+
+    # classes
+    class_correspondance = {"Alarm_bell_ringing": 0, "Speech": 1, "Dog": 2,
+                            "Cat": 3, "Vacuum_cleaner": 4,
+                            "Dishes": 5, "Frying": 6,
+                            "Electric_shaver_toothbrush": 7, "Blender": 8,
+                            "Running_water": 9}
+    class_list = list(class_correspondance.keys())
+
+    encoder = Encoder(class_list, 200, 10, 200)
+
+    import time
+    def test(name):
+        start = time.time()
+        print("testing", name, end="")
+        segments = encoder.encode(strong_prediction, method=name)
+        end = time.time() - start
+
+        print("done in %.2f seconds" % end)
+
+    test("threshold")
+    test("hysteresis")
+    test("derivative")
+    test("mean_threshold")
+    test("median_threshold")
+    test("global_mean_threshold")
+    test("global_median_threshold")
