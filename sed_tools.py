@@ -1,6 +1,9 @@
 import sed_eval
 import dcase_util as dcu
 
+from collections.abc import Iterable
+
+
 
 def evaluator(reference_event_list, estimated_event_list,
               t_collar: float = 0.200,
@@ -68,8 +71,9 @@ def __detect_separator(exemple: str) -> str:
     known_sep = [",", ";", ":", "\t"]
 
     for sep in known_sep:
-        if len(exemple.split(sep)) > 0:
+        if len(exemple.split(sep)) > 1:
             return sep
+
     return "\t"
 
 
@@ -89,14 +93,15 @@ def convert_to_mdc(event_list) -> dcu.containers.MetaDataContainer:
     if isinstance(estimated, dcu.containers.MetaDataContainer):
         estimated = estimated
 
-    # list of string
-    elif isinstance(estimated, list):
-        if isinstance(estimated[0], str):
-            estimated = list_string_to_mdc(event_list)
-
     # A string
     elif isinstance(estimated, str):
         estimated = string_to_mdc(event_list)
+
+    # list of string
+    elif isinstance(estimated, Iterable):
+        if isinstance(estimated[0], str):
+            estimated = list_string_to_mdc(event_list)
+
 
     else:
         raise ValueError("This format %s can't be used. " % type(event_list))
@@ -123,7 +128,8 @@ def string_to_mdc(event_strings: str) -> dcu.containers.MetaDataContainer:
     sep = __detect_separator(event_strings.split("\n")[0])
 
     for line in event_strings.split("\n"):
-        info = line.split(sep)
+        # TODO automatic separator
+        info = line.split("\t")
 
         list_json.append({
             "file": info[0],
@@ -154,7 +160,7 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
     sep = __detect_separator(event_list[0])
 
     for line in event_list:
-        info = line.split(sep)
+        info = line.split("\t")
 
         list_json.append({
             "file": info[0],
