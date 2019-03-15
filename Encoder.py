@@ -301,10 +301,15 @@ class Encoder:
 
         # Recover kwargs arguments
         thresholds = kwargs.get('thresholds', None)
+        threshold = kwargs.get("threshold", None)
 
         # Binarize if requested using the given thresholds
-        if thresholds is None:
-            thresholds = [0.5] * len(self.classes)
+        if thresholds is not None and threshold is not None:
+            raise AttributeError("Can't have at the same time \"threshold\" "
+                                 "and \"thresholds\" set")
+
+        if threshold:
+            thresholds = [threshold] * len(self.classes)
 
         bin_prediction = temporal_prediction.copy()
         bin_prediction[bin_prediction > thresholds] = 1

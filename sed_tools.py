@@ -166,7 +166,6 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
     return dcu.containers.MetaDataContainer(list_json)
 
 
-
 if __name__=='__main__':
     import numpy as np
     from Encoder import Encoder
