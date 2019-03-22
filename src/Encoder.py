@@ -3,6 +3,8 @@
 """
 import numpy as np
 
+from collections.abc import Iterable
+
 
 class Encoder:
     """ Allow the localization in time of sound events using temporal prediction.
@@ -320,18 +322,10 @@ class Encoder:
         output = []
 
         # Recover kwargs arguments
-        thresholds = kwargs.get('thresholds', None)
-        threshold = kwargs.get("threshold", None)
+        thresholds = kwargs.get("threshold", None)
 
-        # Binarize if requested using the given thresholds
-        if thresholds is not None and threshold is not None:
-            raise AttributeError("Can't have at the same time \"threshold\" "
-                                 "and \"thresholds\" set")
-
-        if threshold:
-            thresholds = [threshold] * len(self.classes)
-
-        print(threshold)
+        if not isinstance(thresholds, Iterable):
+            thresholds = [thresholds] * len(self.classes)
 
         bin_prediction = temporal_prediction.copy()
         bin_prediction[bin_prediction > thresholds] = 1
