@@ -33,9 +33,6 @@ def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
         zip( keys, combination )
     )
 
-    print("Evaluating : ")
-    print(combination)
-
     # Compute segment and transform into a csv string
     segments = encoder.encode(
         y_pred,
@@ -210,8 +207,8 @@ class DichotomicOptimizer(Optimizer):
         # research space for each parameters
         tmp_param = dict(zip(keys, list(zip(tuples[-1][0], tuples[-3][0]))))
 
-        # In some case, like with str param or unique value param,
-        # The tuple created is no suitable, so we take only the first element
+        # in some case, like with str param or unique value param,
+        # the tuple created is no suitable, so we take only the first element
         # to go back to a unique parameter
         for key in tmp_param:
             # if suppose to be str --> str
@@ -358,7 +355,7 @@ class GenOptimizer(Optimizer):
                     means = first_recursion(param[key])
                     outputs[key] = randomize(self.param[key], means)
                 else:
-                    outputs[key] = randomize(self.param[key], param[key])
+                    outputs[key] = randomize(self.param[key], param[key][0])
 
                 # if list --> actual list
             elif isinstance(param[key], list):
@@ -397,6 +394,43 @@ class GenOptimizer(Optimizer):
 
         # Create the global parameter combinations
         return list(zip(*random_picks.values()))
+
+    def find_best_combination(self, source: dict, keys: list) -> dict:
+        """
+
+        Args:
+            source:
+            keys:
+
+        Returns:
+
+        """
+        # find the best combination of parameters
+        tuples = list(zip(source.keys(), source.values()))
+        tuples = sorted(tuples, key=lambda x: x[1])
+
+        best = tuples[-1][0]
+
+        # required to have the proper type and perform the next recursion
+        best = list(best)
+        best[0] = (list(best[0]), )
+        best = tuple(best)
+
+        # Retribute the origal keys
+        tmp_param = dict(zip(keys, best))
+
+        # in some case, like with str param or unique value param,
+        # the tuple created is no suitable, so we take only the first element
+        # to go back to a unique parameter
+        for key in tmp_param:
+            # if suppose to be str --> str
+            if isinstance(self.param[key], str):
+                tmp_param[key] = tmp_param[key][0]
+
+            if isinstance(self.param[key], list):
+                tmp_param[key] = self.param[key]
+
+        return tmp_param
 
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
             monitor: str = "f_measure", verbose: int = 1,
@@ -457,8 +491,9 @@ class GenOptimizer(Optimizer):
                 results_monitor[combination] = \
                     r["class_wise_average"]["f_measure"][monitor]
 
-            print("\n final results\n")
-            for r in results_monitor:
-                print("----", results_monitor[r])
+            # Find the best parameters
+            best = self.find_best_combination(results_monitor,
+                                              list(_param.keys()))
 
-            break
+            print(best)
+            _param = best
