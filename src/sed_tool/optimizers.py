@@ -1,8 +1,8 @@
 import numpy as np
 import itertools
 
-from Encoder import Encoder
-from sed_tools import evaluator
+from sed_tool.Encoder import Encoder
+from sed_tool.sed_tools import evaluator
 
 from multiprocessing import Pool
 
@@ -334,7 +334,7 @@ class GenOptimizer(Optimizer):
 
                 # clip and remove duplicate (save some iteration)
                 r = np.clip(r, a_min=original_tupl[0], a_max=original_tupl[1])
-                r = np.unique(r)
+                #r = np.unique(r)
 
                 outputs.append(r)
 
@@ -360,13 +360,13 @@ class GenOptimizer(Optimizer):
                 # if list --> actual list
             elif isinstance(param[key], list):
                 outputs[key] = param[key]
+                
+            # if str --> fix value, no changing
+            elif isinstance(param[key], str):
+                outputs[key] = [param[key]]
 
             # if not iterable --> fix value, no changing
             elif not isinstance(param[key], Iterable):
-                outputs[key] = [param[key]]
-
-            # if str --> fix value, no changing
-            elif isinstance(param[key], str):
                 outputs[key] = [param[key]]
 
         return outputs
@@ -425,7 +425,7 @@ class GenOptimizer(Optimizer):
         for key in tmp_param:
             # if suppose to be str --> str
             if isinstance(self.param[key], str):
-                tmp_param[key] = tmp_param[key][0]
+                tmp_param[key] = tmp_param[key]
 
             if isinstance(self.param[key], list):
                 tmp_param[key] = self.param[key]
