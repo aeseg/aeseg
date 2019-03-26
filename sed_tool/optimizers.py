@@ -122,9 +122,28 @@ class Optimizer:
 
     @property
     def history(self) -> dict:
+        """
+        Return the complete history of the optimization process, useful for
+        visualization of the optimization process. Work only if an optimization
+        process have been already done
+
+        Returns:
+            a list of dict, see sed_eval documentation for further detail
+        """
         if not self.fitted:
             raise RuntimeWarning("No optimization done yet")
         return self.results
+
+    @property
+    def best(self) -> tuple:
+        """
+        Return the combination of parameters that yeld the best score using the
+        monitored metric
+
+        Returns:
+            tuple (parameters, score)
+        """
+        pass
 
 
 class DichotomicOptimizer(Optimizer):
