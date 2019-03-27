@@ -1,10 +1,11 @@
-import sed_eval
-import dcase_util as dcu
-
 from collections.abc import Iterable
 
+import dcase_util as dcu
+import sed_eval
 
-def evaluator(y_true, y_pred,
+
+# TODO change eb to event base somethin
+def eb_evaluator(y_true, y_pred,
               t_collar: float = 0.200,
               percentage_of_length: float = 0.2
               ) -> sed_eval.sound_event.EventBasedMetrics:
@@ -41,7 +42,8 @@ def evaluator(y_true, y_pred,
     _y_true = convert_to_mdc(y_true)
     _y_pred = convert_to_mdc(y_pred)
 
-    return event_based_evaluation(_y_true, _y_pred)
+    return event_based_evaluation(_y_true, _y_pred,
+                                  t_collar, percentage_of_length)
 
     # print(_y_true.unique_event_labels)
     # event_based_metric = sed_eval.sound_event.EventBasedMetrics(
@@ -54,7 +56,8 @@ def evaluator(y_true, y_pred,
     #     _y_true, _y_pred
     # )
 
-def event_based_evaluation(reference_event_list, estimated_event_list):
+def event_based_evaluation(reference_event_list, estimated_event_list,
+                           t_collar: float, percentage_of_length: float):
     """Calculate sed_eval event based metric for challenge
 
     Args:
@@ -73,8 +76,8 @@ def event_based_evaluation(reference_event_list, estimated_event_list):
 
     event_based_metric = sed_eval.sound_event.EventBasedMetrics(
         event_label_list=reference_event_list.unique_event_labels,
-        t_collar=0.200,
-        percentage_of_length=0.2,
+        t_collar=t_collar,
+        percentage_of_length=percentage_of_length,
     )
 
     for file in evaluated_files:
@@ -95,6 +98,41 @@ def event_based_evaluation(reference_event_list, estimated_event_list):
         )
 
     return event_based_metric
+
+
+def sb_evaluator(y_true, y_pred,
+                 time_resolution) -> sed_eval.sound_event.SegmentBasedMetrics:
+
+    # TODO add doc
+    # convert the data into dcase_util.containers.MetadataContainer
+    _y_true = convert_to_mdc(y_true)
+    _y_pred = convert_to_mdc(y_pred)
+
+    return segment_based_evaluation(_y_true, _y_pred, time_resolution)
+
+def segment_based_evaluation(reference_event_list, estimated_event_list,
+                             time_resolution):
+    # TODO add documentation
+    segment_based_metrics = sed_eval.sound_event.SegmentBasedMetrics(
+        event_label_list=reference_event_list.unique_event_labels,
+        time_resolution=time_resolution
+    )
+
+    for filename in reference_event_list.unique_files:
+        reference_event_list_for_current_file = reference_event_list.filter(
+            filename=filename
+        )
+
+        estimated_event_list_for_current_file = estimated_event_list.filter(
+            filename=filename
+        )
+
+        segment_based_metrics.evaluate(
+            reference_event_list=reference_event_list_for_current_file,
+            estimated_event_list=estimated_event_list_for_current_file
+        )
+
+    return segment_based_metrics
 
 # ==============================================================================
 #
@@ -146,7 +184,6 @@ def convert_to_mdc(event_list) -> dcu.containers.MetaDataContainer:
 
     else:
         raise ValueError("This format %s can't be used. " % type(event_list))
-
 
 
 def string_to_mdc(event_strings: str) -> dcu.containers.MetaDataContainer:
