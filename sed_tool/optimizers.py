@@ -1,13 +1,12 @@
-import numpy as np
 import itertools
-
-from sed_tool.Encoder import Encoder
-from sed_tool.sed_tools import evaluator
-
+from collections.abc import Iterable
 from multiprocessing import Pool
 
-from collections.abc import Iterable
+import numpy as np
 import tqdm
+
+from sed_tool.Encoder import Encoder
+from sed_tool.sed_tools import sb_evaluator, eb_evaluator
 
 
 def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
@@ -42,7 +41,15 @@ def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
     to_evaluate = encoder.parse(segments, filenames)
 
     # evaluate using sed_eval
-    return evaluator(y_true, to_evaluate).results()
+    if encoder.method == "segment_based_metrics":
+        return sb_evaluator(y_true, to_evaluate,
+                            time_resolution=encoder.time_resolution
+                            ).results()
+    else:
+        return eb_evaluator(y_true, to_evaluate,
+                         t_collar=encoder.t_collar,
+                         percentage_of_length=encoder.percentage_of_length
+                         ).results()
 
 
 class Optimizer:
