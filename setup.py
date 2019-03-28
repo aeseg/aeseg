@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sed_tool",
-    version="0.0.2post1",
+    version="0.0.4",
     author="Leo Cances",
     author_email="leo.cances@gmail.com",
     description="A test package in python",
@@ -18,6 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    py_modules = ["optimizers"],
 )
 
