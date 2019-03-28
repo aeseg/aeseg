@@ -135,8 +135,9 @@ class Encoder:
         sed_eval.
 
         Args:
-            all_segments (list): a list of dict of 10 key. the list length is equal to the number of file, the dict number
-            test_files_name (list): The list of the file names in the same
+            all_segments (list): a list of dict of 10 key. the list length is
+            equal to the number of file, the dict number test_files_name
+             (list): The list of the file names in the same
         """
         output = ""
 
@@ -318,21 +319,28 @@ class Encoder:
         return output
 
     def __encode_using_threshold(self, temporal_prediction: np.array,
-                                 **kwargs) -> list:
-        """A basic threshold algorithm. Each value that are above the threshold
-        will be part of a valid segment, an invalid one otherwise.
+                                 threshold: float or list, **kwargs) -> list:
+        """A basic threshold segmentation algorithm.
+
+        For each frame where the probability is above the given threshold,
+        will be part of a valid segment, an invalid one otherwise. The
+        threshold can be set globally (one unique threshold for all the
+        classes) or independantely (one threshold for each classes)
 
         Args:
-            temporal_prediction (np.array):
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
+            threshold (float or list): One unique threshold or a list of
+                threhsold. If using a list, it must define one threshold for
+                each class
             **kwargs:
         """
         output = []
 
-        # Recover kwargs arguments
-        thresholds = kwargs.get("threshold", None)
-
-        if not isinstance(thresholds, Iterable):
-            thresholds = [thresholds] * len(self.classes)
+        thresholds = threshold
+        if not isinstance(threshold, Iterable):
+            thresholds = [threshold] * len(self.classes)
 
         bin_prediction = temporal_prediction.copy()
         bin_prediction[bin_prediction > thresholds] = 1
