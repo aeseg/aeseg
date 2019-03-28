@@ -94,6 +94,7 @@ class Optimizer:
         self.fitted = False
 
         # Monitoring
+        self.monitor = None
         self.progress = None
 
     def nb_iteration(self):
@@ -116,6 +117,7 @@ class Optimizer:
         self._y_true = y_true
         self._y_pred = y_pred
         self._filenames = filenames
+        self.monitor = monitor
 
         self.process_pool = Pool(processes=self.nb_process)
 
@@ -150,6 +152,19 @@ class Optimizer:
         Returns:
             tuple (parameters, score)
         """
+        if not self.fitted:
+            raise RuntimeWarning("No optimization done yet")
+
+        out = []
+
+        for k in self.results.keys():
+            out.append((k, self.results[k]["class_wise_average"]["f_measure"][
+                self.monitor]))
+
+        out = sorted(out, key=lambda x: x[1])
+
+        # pair each value with it parameter
+        return dict(zip(self.keys, out[-1][0])), out[-1][1]
         pass
 
 
