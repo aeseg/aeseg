@@ -19,8 +19,8 @@ class Encoder:
     def __init__(self, classes: list, temporal_precision: int, clip_length: int,
                  minimal_segment_step: int, t_collar: float = 0.200,
                  percentage_of_length: float = 0.2,
-                 time_precision: float = 1.00,
-                 method: str = "segment_based_metrics"):
+                 time_resolution: float = 1.00,
+                 method: str = "event_based_metrics"):
         """ Initialization of the encoder.
 
         To initialize the encoder, you must provide the list of the classes that
@@ -47,7 +47,7 @@ class Encoder:
         self.minimal_segment_step = minimal_segment_step
         self.t_collar = t_collar
         self.percentage_of_length = percentage_of_length
-        self.time_precision = time_precision
+        self.time_resolution = time_resolution
         self.method = method
 
         # Attribute that are not initialize with the constructor
@@ -704,7 +704,7 @@ class Encoder:
         return smoother(temporal_prediction, **kwargs)
 
     def __smooth_moving_median(self, temporal_prediction: np.array,
-                               windows_len: int = 11, **kwargs):
+                               window_len: int = 11, **kwargs):
         """
         Args:
             temporal_prediction (np.array):
