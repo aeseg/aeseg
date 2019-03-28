@@ -68,10 +68,14 @@ class Encoder:
         variance of the prediction over the time.
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array.
-                (<nb clip>, <nb frame>, <nb class>).
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             method (str):
-                The segmentation method to use [threshold | hysteresis | derivative | primitive].
+                The segmentation method to use
+                [threshold | hysteresis | derivative | primitive |
+                mean_threshold | global_mean_threshold | median_threshold |
+                gobal_median_threshold].
             smooth (str):
                 The smoothing method to use [smoothMovingAvg].
             kwargs:
@@ -177,8 +181,9 @@ class Encoder:
         threhsold)
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array (<nb
-                clip>, <nb frame>, <nb class>)
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             rising (float): Must be between 0 and 1, rising threshold. When the
             decreasing (float): Must be between 0 and 1, decreasing threshold
             window_size (int): size of the processing window
@@ -261,8 +266,9 @@ class Encoder:
         prediction is noisy
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array (<nb
-                clip>, <nb frame>, <nb class>)
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             kwargs: Extra arguments - "high" and "low" (thresholds for the
                 hysteresis)
 
@@ -405,7 +411,9 @@ class Encoder:
         `__encode_using_threshold` function to apply it.
 
         Args:
-            temporal_prediction (np.array):
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             **kwargs:
         """
 
@@ -437,7 +445,9 @@ class Encoder:
         `__encoder_using_threshold` function to apply it.
 
         Args:
-            temporal_prediction (np.array):
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             **kwargs:
         """
 
@@ -469,8 +479,9 @@ class Encoder:
         compute new threshold(s) (global or independent) for each files.
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array (<nb
-                clip>, <nb frame>, <nb class>)
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             **kwargs:
 
         Returns:
@@ -553,8 +564,9 @@ class Encoder:
         compute new threshold(s) (global or independent) for each files.
 
         Args:
-            temporal_prediction (np.array): A 3-dimension numpy array (nb clip,
-                nb frame, nb class)
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             **kwargs:
 
         Returns:
@@ -635,7 +647,9 @@ class Encoder:
                                          **kwargs) -> list:
         """
         Args:
-            temporal_prediction (np.array):
+            temporal_prediction (np.array): The complete set for
+                probabilities that need to segmented. must be a three dimensional
+                numpy array (<sample>, <class>, <frames>)
             **kwargs:
         """
         raise NotImplementedError()
