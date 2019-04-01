@@ -133,7 +133,6 @@ class Encoder:
         # Execute the selected segmentation algorithm and recover its results
         return encoder(temporal_prediction, **kwargs)
 
-
     def parse(self, all_segments: list, test_files_name: list) -> str:
         """Transform a list of segment into a string ready for evaluation with
         sed_eval.
@@ -405,7 +404,8 @@ class Encoder:
         return output
 
     def __encode_using_gmean_threshold(self, temporal_prediction: np.array,
-                                       **kwargs) -> list:
+                                       independent: bool = False, **kwargs
+                                       ) -> list:
         """Using all the temporal prediction, the mean of each curve and for
         each class is computed and will be choose as threshold. Then call the
         `__encode_using_threshold` function to apply it.
@@ -417,9 +417,6 @@ class Encoder:
             **kwargs:
         """
 
-        # Recover the kwargs arguments
-        _global = kwargs.get("global", False)
-
         total_thresholds = []
 
         for clip in temporal_prediction:
@@ -427,19 +424,20 @@ class Encoder:
 
         total_thresholds = np.array(total_thresholds)
 
-        if _global:
+        if independent:
             return self.__encode_using_threshold(
                 temporal_prediction,
-                thresholds=total_thresholds.mean(axis=0),
+                threshold=total_thresholds.mean(axis=0),
                 **kwargs)
         else:
             return self.__encode_using_threshold(
                 temporal_prediction,
-                thresholds=[total_thresholds.mean()] * len(self.classes),
+                threshold=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
     def __encode_using_gmedian_threshold(self, temporal_prediction: np.array,
-                                         **kwargs) -> list:
+                                         independent: bool = False, **kwargs
+                                         ) -> list:
         """Using all the temporal prediction, the mean of each curve and for
         each class is compted and will be choose as threshold. Then call the
         `__encoder_using_threshold` function to apply it.
@@ -451,9 +449,6 @@ class Encoder:
             **kwargs:
         """
 
-        # Recover the kwargs arguments
-        _global = kwargs.get("global", False)
-
         total_thresholds = []
         for clip in temporal_prediction:
             # compute unique threshold for this file
@@ -462,15 +457,15 @@ class Encoder:
 
         total_thresholds = np.array(total_thresholds)
 
-        if _global:
+        if independent:
             return self.__encode_using_threshold(
                 temporal_prediction,
-                thresholds=total_thresholds.mean(axis=0),
+                threshold=total_thresholds.mean(axis=0),
                 **kwargs)
         else:
             return self.__encode_using_threshold(
                 temporal_prediction,
-                thresholds=[total_thresholds.mean()] * len(self.classes),
+                threshold=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
     def __encode_using_mean_threshold(self, temporal_prediction: np.array,

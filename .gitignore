@@ -3,6 +3,7 @@ build/
 source/
 .idea/
 tests/
+data/
 optimization_pour_thomas.py
 
 evaluation_measures.py
