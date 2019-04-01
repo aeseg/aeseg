@@ -229,8 +229,7 @@ class DichotomicOptimizer(Optimizer):
 
         return nb_iteration * self.nb_recurse
 
-    def two_best(self, source: dict, keys: list,
-                 current_recurse_param: dict )-> dict:
+    def two_best(self, source: dict, keys: list)-> dict:
         """Return the new range (tuples) for each parameters based on the two
         best results
 
@@ -253,32 +252,18 @@ class DichotomicOptimizer(Optimizer):
         for key in best_combination:
             # only for tuple range
             if isinstance(self.param[key], tuple):
-                best_at = np.where(current_recurse_param[key] == best_combination[key])
+                best = best_combination[key]
+                half = best / 2.0
 
-                # if several best, keep the first one
-                best_at = best_at[0]
+                # boundaries
+                low = best - half
+                high = best + half
 
-                # if index is first (== 0), take it and the next one
-                if best_at == 0:
-                    best_combination[key] = (
-                        current_recurse_param[key][best_at][0],
-                        current_recurse_param[key][best_at+1][0]
-                    )
+                # clip
+                low = low if low > self.param[key][0] else self.param[key][0]
+                high = high if high < self.param[key][1] else self.param[key][1]
 
-                # if index is last, take it and the previous one
-                elif best_at == self.step - 1:
-                    best_combination[key] = (
-                        current_recurse_param[key][best_at-1][0],
-                        current_recurse_param[key][best_at][0],
-                    )
-
-                # else, take previous and next one
-                else:
-                    best_combination[key] = (
-                        current_recurse_param[key][best_at-1][0],
-                        current_recurse_param[key][best_at+1][0],
-
-                    )
+                best_combination[key] = (low, high)
 
         # in some case, like with str param or unique value param,
         # the tuple created is no suitable, so we take only the first element
@@ -354,10 +339,7 @@ class DichotomicOptimizer(Optimizer):
                     r["class_wise_average"]["f_measure"][monitor]
 
             # Find the two best results among this recursion
-            two_best = self.two_best(
-                results_monitor, list(_param.keys()),
-                search_space
-            )
+            two_best = self.two_best(results_monitor, list(_param.keys()))
 
             # Set the new parameters range for the next recursion
             _param = two_best
