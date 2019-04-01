@@ -229,7 +229,8 @@ class DichotomicOptimizer(Optimizer):
 
         return nb_iteration * self.nb_recurse
 
-    def two_best(self, source: dict, keys: list) -> dict:
+    def two_best(self, source: dict, keys: list,
+                 current_recurse_param: dict )-> dict:
         """Return the new range (tuples) for each parameters based on the two
         best results
 
@@ -244,22 +245,54 @@ class DichotomicOptimizer(Optimizer):
         # Sort the combination by the score
         tuples.sort(key=lambda elem: elem[1])
 
-        # Create a dictionary for each key and a tuple representing the new
-        # research space for each parameters
-        tmp_param = dict(zip(keys, list(zip(tuples[-1][0], tuples[-3][0]))))
+        # best parameters combination
+        best_combination = dict(zip(keys, tuples[-1][0]))
+
+        # For each parameters that need it (tuple), build the new search
+        # boundaries
+        for key in best_combination:
+            # only for tuple range
+            if isinstance(self.param[key], tuple):
+                best_at = np.where(current_recurse_param[key] == best_combination[key])
+
+                # if several best, keep the first one
+                best_at = best_at[0]
+
+                # if index is first (== 0), take it and the next one
+                if best_at == 0:
+                    best_combination[key] = (
+                        current_recurse_param[key][best_at][0],
+                        current_recurse_param[key][best_at+1][0]
+                    )
+
+                # if index is last, take it and the previous one
+                elif best_at == self.step - 1:
+                    best_combination[key] = (
+                        current_recurse_param[key][best_at-1][0],
+                        current_recurse_param[key][best_at][0],
+                    )
+
+                # else, take previous and next one
+                else:
+                    best_combination[key] = (
+                        current_recurse_param[key][best_at-1][0],
+                        current_recurse_param[key][best_at+1][0],
+
+                    )
 
         # in some case, like with str param or unique value param,
         # the tuple created is no suitable, so we take only the first element
         # to go back to a unique parameter
-        for key in tmp_param:
+        for key in best_combination:
             # if suppose to be str --> str
             if isinstance(self.param[key], str):
-                tmp_param[key] = tmp_param[key][0]
+                best_combination[key] = best_combination[key]
 
             if isinstance(self.param[key], list):
-                tmp_param[key] = self.param[key]
+                best_combination[key] = self.param[key]
 
-        return tmp_param
+        print("after : ", best_combination)
+        return best_combination
 
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
             monitor: str = "f_measure", verbose: int = 1,
@@ -321,7 +354,10 @@ class DichotomicOptimizer(Optimizer):
                     r["class_wise_average"]["f_measure"][monitor]
 
             # Find the two best results among this recursion
-            two_best = self.two_best(results_monitor, list(_param.keys()))
+            two_best = self.two_best(
+                results_monitor, list(_param.keys()),
+                search_space
+            )
 
             # Set the new parameters range for the next recursion
             _param = two_best
