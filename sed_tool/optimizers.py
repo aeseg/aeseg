@@ -124,9 +124,9 @@ class Optimizer:
         self.results = dict()
 
         if verbose == 1:
-            self.progress = tqdm.tqdm(total = self.nb_iteration())
+            self.progress = tqdm.tqdm(total=self.nb_iteration())
         if verbose == 2:
-            self.progress = tqdm.tqdm_notebook(total = self.nb_iteration())
+            self.progress = tqdm.tqdm_notebook(total=self.nb_iteration())
 
 
     @property
@@ -229,7 +229,7 @@ class DichotomicOptimizer(Optimizer):
 
         return nb_iteration * self.nb_recurse
 
-    def two_best(self, source: dict, keys: list)-> dict:
+    def two_best(self, source: dict, keys: list, nb_recurse: int = 1)-> dict:
         """Return the new range (tuples) for each parameters based on the two
         best results
 
@@ -253,7 +253,7 @@ class DichotomicOptimizer(Optimizer):
             # only for tuple range
             if isinstance(self.param[key], tuple):
                 best = best_combination[key]
-                half = best / 2.0
+                half = best / (1 + nb_recurse)
 
                 # boundaries
                 low = best - half
@@ -297,7 +297,7 @@ class DichotomicOptimizer(Optimizer):
 
         _param = self.param.copy()
 
-        for _ in range(self.nb_recurse):
+        for recurse in range(self.nb_recurse):
 
             # Create all the combination
             search_space = self.param_to_range(_param)
@@ -339,12 +339,20 @@ class DichotomicOptimizer(Optimizer):
                     r["class_wise_average"]["f_measure"][monitor]
 
             # Find the two best results among this recursion
-            two_best = self.two_best(results_monitor, list(_param.keys()))
+            two_best = self.two_best(
+                results_monitor,
+                list(_param.keys()),
+                recurse
+            )
 
             # Set the new parameters range for the next recursion
             _param = two_best
 
         self.fitted = True
+
+        # close the pool
+        self.process_pool.close()
+        self.process_pool.join()
 
 
 class GenOptimizer(Optimizer):
