@@ -1,4 +1,6 @@
+import functools
 import itertools
+import operator
 from collections.abc import Iterable
 from multiprocessing import Pool
 
@@ -100,8 +102,14 @@ class Optimizer:
     def nb_iteration(self):
         raise NotImplementedError
 
+    def find(self, monitor: tuple, data: dict):
+        """Find the metric to monitor in the nested dictionary return by
+        the evaluator."""
+        return functools.reduce(operator.getitem, monitor, data)
+
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
-            monitor: str = "f_measure", verbose: int = 1,
+            monitor: tuple = ("class_wise_average", "f_measure", "f_measure"),
+            verbose: int = 1,
             method: str = "threshold") -> dict:
         """Initialize the thread pool and perform the optimization.*
 
@@ -143,8 +151,10 @@ class Optimizer:
             raise RuntimeWarning("No optimization done yet")
         return self.results
 
+
     @property
     def best(self) -> tuple:
+
         """
         Return the combination of parameters that yeld the best score using the
         monitored metric
@@ -158,8 +168,8 @@ class Optimizer:
         out = []
 
         for k in self.results.keys():
-            out.append((k, self.results[k]["class_wise_average"]["f_measure"][
-                self.monitor]))
+            value = self.find(self.monitor, self.results[k])
+            out.append((k, value))
 
         out = sorted(out, key=lambda x: x[1])
 
@@ -280,7 +290,8 @@ class DichotomicOptimizer(Optimizer):
         return best_combination
 
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
-            monitor: str = "f_measure", verbose: int = 1,
+            monitor: tuple = ("class_wise_average","f_measure","f_measure"),
+            verbose: int = 1,
             method: str = "threshold") -> dict:
         """Initialize the thread pool and perform the optimization.*
 
@@ -335,8 +346,8 @@ class DichotomicOptimizer(Optimizer):
             # metric
             results_monitor = dict()
             for combination, r in results:
-                results_monitor[combination] = \
-                    r["class_wise_average"]["f_measure"][monitor]
+                value = self.find(monitor, r)
+                results_monitor[combination] = value
 
             # Find the two best results among this recursion
             two_best = self.two_best(
