@@ -170,7 +170,7 @@ class Encoder:
     def _encode_using_derivative(self, temporal_prediction: np.array,
                                  rising: float = 0.5, decreasing: float = -0.5,
                                  window_size: int = 5, high: float = 0.8,
-                                 padding: str = "same") -> list:
+                                 padding: str = "same", **kwargs) -> list:
         """The derivative create segment based on the intensity of the variation
         of the temporal prediction curve. If the prediction rise above a certain
         threshold `rising` then a valid segment start. If it decrease faster
@@ -195,6 +195,8 @@ class Encoder:
         """
 
         output = []
+
+        window_size = int(window_size)
 
         for clip in temporal_prediction:
             cls = 0
@@ -733,7 +735,9 @@ class Encoder:
     def __smooth_moving_avg(self, temporal_prediction: np.array,
                             window_len: int = 5, padding: str = "same",
                             **kwargs):
-        """
+        """ APply the smooth moving average on all class. Can be
+        class-dependant or not.
+
         Args:
             temporal_prediction (np.array):
             window_len (int): The size of the smoothing window
@@ -760,10 +764,16 @@ class Encoder:
         # core
         smoothed_temporal_prediction = temporal_prediction.copy()
 
+        # In only one window len given, same for all class
+        # if nb window_len = nb cls --> one for each class
+        windows_len = window_len
+        if not isinstance(window_len, Iterable):
+            windows_len = [window_len] * len(self.classes)
+
         for clip_ind in range(len(smoothed_temporal_prediction)):
             clip = smoothed_temporal_prediction[clip_ind]
 
             for cls_ind in range(len(clip.T)):
-                clip.T[cls_ind] = smooth(clip.T[cls_ind], window_len)
+                clip.T[cls_ind] = smooth(clip.T[cls_ind], windows_len[cls_ind])
 
         return smoothed_temporal_prediction
