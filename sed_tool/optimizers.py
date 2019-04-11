@@ -107,6 +107,16 @@ class Optimizer:
         the evaluator."""
         return functools.reduce(operator.getitem, monitor, data)
 
+    def dict_nan_to_num(self, d: dict):
+        """For every np.nan within the dictionary and the nested dictionary,
+        will convert every nan to 0.0
+        """
+        for k in d:
+            if isinstance(d[k], dict):
+                self.dict_nan_to_num(d[k])
+            else:
+                d[k] = np.nan_to_num(d[k])
+
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
             monitor: tuple = ("class_wise_average", "f_measure", "f_measure"),
             verbose: int = 1,
@@ -286,7 +296,6 @@ class DichotomicOptimizer(Optimizer):
             if isinstance(self.param[key], list):
                 best_combination[key] = self.param[key]
 
-        print("after : ", best_combination)
         return best_combination
 
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
@@ -338,8 +347,12 @@ class DichotomicOptimizer(Optimizer):
                 if verbose != 0:
                     self.progress.update()
 
+
             # Save all results in the history. The combination will be the key
+            # In some case, for instance, where there is no segments. The
+            # evaluator can return nan value. --> convert all nan to 0.0
             for combination, res in results:
+                self.dict_nan_to_num(res)
                 self.results[combination] = res
 
             # The best parameters combination is evaluate using the monitored
@@ -357,6 +370,7 @@ class DichotomicOptimizer(Optimizer):
             )
 
             # Set the new parameters range for the next recursion
+            print("after : ", two_best)
             _param = two_best
 
         self.fitted = True
