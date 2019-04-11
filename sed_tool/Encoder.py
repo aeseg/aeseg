@@ -740,7 +740,8 @@ class Encoder:
 
         Args:
             temporal_prediction (np.array):
-            window_len (int): The size of the smoothing window
+            window_len (int): The size of the smoothing window, can be
+            class-dependant if a list is given
             padding (str): The padding mode to use
             **kwargs:
         """
@@ -777,3 +778,4 @@ class Encoder:
                 clip.T[cls_ind] = smooth(clip.T[cls_ind], windows_len[cls_ind])
 
         return smoothed_temporal_prediction
+
