@@ -260,6 +260,7 @@ class Encoder:
         return output
 
     def __encode_using_hysteresis(self, temporal_prediction: np.array,
+                                  low: float = 0.4, high: float = 0.6,
                                   **kwargs) -> list:
         """The hysteresis based segmentation algorithm require two threhsolds. A
         high value to decided when the segment should start and a low value to
@@ -270,15 +271,26 @@ class Encoder:
             temporal_prediction (np.array): The complete set for
                 probabilities that need to segmented. must be a three dimensional
                 numpy array (<sample>, <class>, <frames>)
-            kwargs: Extra arguments - "high" and "low" (thresholds for the
-                hysteresis)
+            low (float): low threshold (can be a list for class-dependant
+                thresholding)
+            high (float): high threshold (can ve a list for class-dependant
+                thresholding)
+            kwargs: Extra arguments
 
         Returns:
             the result of the system under the form of a strong annotation text
             where each line represent on timed event
         """
-        low = kwargs["low"] if "low" in kwargs.keys() else 0.4
-        high = kwargs["high"] if "high" in kwargs.keys() else 0.6
+
+        # In case of class dependant thresholding
+        lows = low
+        if not isinstance(low, Iterable):
+            lows = [low] * len(self.classes)
+
+        highs = high
+        if not isinstance(high, Iterable):
+            highs = [high] * len(self.classes)
+
         prediction = temporal_prediction
 
         output = []
@@ -287,7 +299,7 @@ class Encoder:
             labeled = dict()
 
             cls = 0
-            for prediction_per_class in clip.T:
+            for cls_ind, prediction_per_class in enumerate(clip.T):
                 converted = list()
                 segment = [0, 0]
                 nb_segment = 1
@@ -296,18 +308,23 @@ class Encoder:
 
                     # first element
                     if i == 0:
-                        segment = [1.0, 1] if element > high else [0.0, 1]
+                        if element > highs[cls_ind]:
+                            segment = [1.0, 1]
+                        else:
+                            segment = [0.0, 1]
 
-                        # then
-                    if element > high:
+                    # then
+                    if element > highs[cls_ind]:
                         if segment[0] == 1:
                             segment[1] += 1
                         else:
                             converted.append(segment)
                             nb_segment += 1
                             segment = [1.0, 1]
-                    elif low <= element:
+
+                    elif lows[cls_ind] <= element:
                         segment[1] += 1
+
                     else:
                         if segment[0] == 0:
                             segment[1] += 1
@@ -705,6 +722,12 @@ class Encoder:
             method (str): The algorithm to use for smoothing the curves
             kwargs: See argument list for the smoothing algorithm
         """
+        # TODO give possibility to make a class-dependant smooth method
+
+        # the method can be class dependant
+        #methods = method
+        #if not isinstance(method, Iterable):
+        #    methods = [method] * len(self.classes)
 
         # Check if methods asked exist
         _methods = ["smoothMovingAvg", "smoothMovingMedian"]
@@ -749,7 +772,7 @@ class Encoder:
         def smooth(data, _window_len):
             _window_len = int(_window_len)
 
-            if window_len < 3:
+            if _window_len < 3:
                 return data
 
             s = np.r_[
