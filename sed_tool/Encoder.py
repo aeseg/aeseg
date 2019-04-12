@@ -196,38 +196,63 @@ class Encoder:
 
         output = []
 
-        window_size = int(window_size)
+        # for class-dependant parameters
+        window_sizes = window_size
+        if not isinstance(window_size, Iterable):
+            window_sizes = [window_size] * len(self.classes)
+
+        risings = rising
+        if not isinstance(rising, Iterable):
+            risings = [rising] * len(self.classes)
+
+        decreasings = decreasing
+        if not isinstance(decreasing, Iterable):
+            decreasings = [decreasing] * len(self.classes)
+
+        highs = high
+        if not isinstance(high, Iterable):
+            highs = [high] * len(self.classes)
+
 
         for clip in temporal_prediction:
             cls = 0
             labeled = dict()
 
-            for prediction_per_class in clip.T:
+            for cls_ind, prediction_per_class in enumerate(clip.T):
+                # get class-dependant parameters
+                _window_size = int(window_sizes[cls_ind])
+                _rising = risings[cls_ind]
+                _decreasing = decreasings[cls_ind]
+                _high = highs[cls_ind]
+
                 padded_prediction_per_class = self.__pad(prediction_per_class,
-                                                         window_size,
+                                                         _window_size,
                                                          method=padding)
 
                 nb_segment = 1
                 segments = []
                 segment = [0.0, 0]
-                for i in range(len(padded_prediction_per_class) - window_size):
-                    window = padded_prediction_per_class[i:i + window_size]
-                    slope = (window[-1] - window[0]) / window_size
+                for i in range(len(padded_prediction_per_class) - _window_size):
+                    window = padded_prediction_per_class[i:i + _window_size]
+                    slope = (window[-1] - window[0]) / _window_size
 
                     # first element
                     if i == 0:
-                        segment = [1.0, 1] if window[0] > high else [0.0, 1]
+                        if window[0] > _high:
+                            segment = [1.0, 1]
+                        else:
+                            segment = [0.0, 1]
 
                     # if on "high" segment
                     if segment[0] == 1:
 
                         # if above high threshol
-                        if window[0] > high:
+                        if window[0] > _high:
                             segment[1] += 1
 
                         else:
                             # if decreasing threshold is reach
-                            if slope < decreasing:
+                            if slope < _decreasing:
                                 segments.append(segment)
                                 nb_segment += 1
                                 segment = [0.0, 1]
@@ -238,13 +263,13 @@ class Encoder:
                     else:
 
                         # if above high threshold
-                        if window[0] > high:
+                        if window[0] > _high:
                             segments.append(segment)
                             nb_segment += 1
                             segment = [1.0, 1]
 
                         else:
-                            if slope > rising:
+                            if slope > _rising:
                                 segments.append(segment)
                                 nb_segment += 1
                                 segment = [1.0, 1]
