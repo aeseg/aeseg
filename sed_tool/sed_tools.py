@@ -256,17 +256,19 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
     for line in event_list:
         info = line.split("\t")
 
-        if len(info) == 4:
+        # TODO automatic separator
+        info = line.split("\t")
 
-            list_json.append({
-                "file": info[0],
-                "event_onset": float(info[1]),
-                "event_offset": float(info[2]),
-                "event_label": info[3]
-            })
+        if len(info) != 4:
+            continue
 
-        else:
-            list_json.append({"file": info[0]})
+        info_dict = dict()
+        info_dict["file"] = info[0]
+        if info[1] != "": info_dict["event_onset"] = float(info[1])
+        if info[2] != "": info_dict["event_offset"] = float(info[2])
+        if info[3] != "": info_dict["event_label"] = info[3]
+
+        list_json.append(info_dict)
 
     return dcu.containers.MetaDataContainer(list_json)
 
