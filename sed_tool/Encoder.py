@@ -1,6 +1,3 @@
-"""
-
-"""
 from collections.abc import Iterable
 
 import numpy as np
@@ -147,18 +144,26 @@ class Encoder:
         for clipIndex in range(len(all_segments)):
             clip = all_segments[clipIndex]
 
+            empty_cls = 0
             for cls in clip:
-                start = 0
+                if len(clip[cls]) == 1 and clip[cls][0][0] == 0:
+                    empty_cls += 1
 
-                for segment in clip[cls]:
-                    if segment[0] == 1.0:
-                        output += "%s\t%f\t%f\t%s\n" % (
-                            test_files_name[clipIndex],
-                            start * self.frame_length,
-                            (start + segment[1]) * self.frame_length,
-                            self.class_correspondence_reverse[cls]
-                        )
-                    start += segment[1]
+            if empty_cls == 10:
+                output += "%s\n" % test_files_name[clipIndex]
+            else:
+
+                for cls in clip:
+                    start = 0
+                    for segment in clip[cls]:
+                        if segment[0] == 1.0:
+                            output += "%s\t%f\t%f\t%s\n" % (
+                                test_files_name[clipIndex],
+                                start * self.frame_length,
+                                (start + segment[1]) * self.frame_length,
+                                self.class_correspondence_reverse[cls]
+                            )
+                        start += segment[1]
 
         return output
 
