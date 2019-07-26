@@ -11,7 +11,7 @@ setuptools.setup(
     description="A test package in python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/leocances/SED_tools.git",
+    url="https://github.com/sedtools/sed_tool.git",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
