@@ -301,7 +301,7 @@ class DichotomicOptimizer(Optimizer):
     def fit(self, y_true: np.array, y_pred: np.array, filenames: list,
             monitor: tuple = ("class_wise_average","f_measure","f_measure"),
             verbose: int = 1,
-            method: str = "threshold") -> dict:
+            method: str = "threshold"):
         """Initialize the thread pool and perform the optimization.*
 
         Args:
@@ -328,6 +328,7 @@ class DichotomicOptimizer(Optimizer):
             for combination in all_combination:
                 works.append((
                     combination,
+
                     self.process_pool.apply_async(evaluate, kwds={
                         "combination": combination,
                         "keys": self.keys,
