@@ -1,0 +1,3 @@
+[submodule "publish-docs"]
+	path = publish-docs
+	url = https://github.com/sedtools/sedtools.github.io.git
