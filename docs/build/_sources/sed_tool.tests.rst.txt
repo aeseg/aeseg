@@ -1,0 +1,22 @@
+sed\_tool.tests package
+=======================
+
+Submodules
+----------
+
+sed\_tool.tests.test\_encoder module
+------------------------------------
+
+.. automodule:: sed_tool.tests.test_encoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sed_tool.tests
+    :members:
+    :undoc-members:
+    :show-inheritance:

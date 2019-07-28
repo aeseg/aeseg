@@ -1,0 +1,585 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sed_tool package &mdash; sed_tool 0.0.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> sed_tool
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">sed_tool package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sed_tool.Encoder">sed_tool.Encoder module</a></li>
+<li><a class="reference internal" href="#module-sed_tool.optimizers">sed_tool.optimizers module</a></li>
+<li><a class="reference internal" href="#module-sed_tool.sed_tools">sed_tool.sed_tools module</a></li>
+<li><a class="reference internal" href="#module-sed_tool">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sed_tool</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>sed_tool package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/sed_tool.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sed-tool-package">
+<h1>sed_tool package<a class="headerlink" href="#sed-tool-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sed_tool.tests.html">sed_tool.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sed_tool.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_tool.tests.html#module-sed_tool.tests.test_encoder">sed_tool.tests.test_encoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_tool.tests.html#module-sed_tool.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sed_tool.Encoder">
+<span id="sed-tool-encoder-module"></span><h2>sed_tool.Encoder module<a class="headerlink" href="#module-sed_tool.Encoder" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sed_tool.Encoder.Encoder">
+<em class="property">class </em><code class="descclassname">sed_tool.Encoder.</code><code class="descname">Encoder</code><span class="sig-paren">(</span><em>classes: list</em>, <em>temporal_precision: int</em>, <em>clip_length: int</em>, <em>minimal_segment_step: int</em>, <em>t_collar: float = 0.2</em>, <em>percentage_of_length: float = 0.2</em>, <em>time_resolution: float = 1.0</em>, <em>method: str = 'event_based_metrics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/Encoder.html#Encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.Encoder.Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Allow the localization in time of sound events using temporal prediction.</p>
+<p>In a sound event detection task, the output of the prediction model is
+often a temporal prediction. Different segmentation algorithm exist in order
+to translate this curves into a list of segment. This encoder give you access
+to most of them in a fairly easy way.</p>
+<dl class="method">
+<dt id="sed_tool.Encoder.Encoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>temporal_prediction: numpy.array</em>, <em>method: str = 'threshold'</em>, <em>smooth: str = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="reference internal" href="_modules/sed_tool/Encoder.html#Encoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.Encoder.Encoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the localization of the sound event present in the file.</p>
+<p>Using the temporal prediction provided y the last step of the system,
+it will “localize” the sound event inside the file under the form of a
+strongly annotated line. (see DCASE2018 task 4 strong label exemple).
+There is two methods implemented here, one using a simple threshold
+based segmentation and an other using a modulation system based on the
+variance of the prediction over the time.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>temporal_prediction (np.array): The complete set for</dt>
+<dd>probabilities that need to segmented. must be a three dimensional
+numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</dd>
+<dt>method (str):</dt>
+<dd>The segmentation method to use
+[threshold | hysteresis | derivative | primitive |
+mean_threshold | global_mean_threshold | median_threshold |
+gobal_median_threshold].</dd>
+<dt>smooth (str):</dt>
+<dd>The smoothing method to use [smoothMovingAvg].</dd>
+<dt>kwargs:</dt>
+<dd>See the segmentation method parameters.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>Return a list of positive and negative segments with their size. A
+segment is a tuple where the first value that represent the segment
+value (1) for positive, (0) for negative and the second values is
+the width of the segment (number of frame).</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Exemple:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">`YOTsn73eqbfc_10.000_20.000.wav</span>&#160; <span class="pre">0.163</span>&#160;&#160; <span class="pre">0.665</span>&#160;&#160; <span class="pre">Alarm_bell_ringing`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.Encoder.Encoder.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>all_segments: list</em>, <em>test_files_name: list</em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/sed_tool/Encoder.html#Encoder.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.Encoder.Encoder.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a list of segment into a string ready for evaluation with
+sed_eval.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">all_segments (list): a list of dict of 10 key. the list length is
+equal to the number of file, the dict number test_files_name</p>
+<blockquote class="last">
+<div>(list): The list of the file names in the same</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sed_tool.optimizers">
+<span id="sed-tool-optimizers-module"></span><h2>sed_tool.optimizers module<a class="headerlink" href="#module-sed_tool.optimizers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sed_tool.optimizers.DichotomicOptimizer">
+<em class="property">class </em><code class="descclassname">sed_tool.optimizers.</code><code class="descname">DichotomicOptimizer</code><span class="sig-paren">(</span><em>param: dict</em>, <em>encoder: sed_tool.Encoder.Encoder</em>, <em>step: int</em>, <em>nb_recurse: int</em>, <em>nb_process: int = 4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#DichotomicOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.DichotomicOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sed_tool.optimizers.Optimizer" title="sed_tool.optimizers.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sed_tool.optimizers.Optimizer</span></code></a></p>
+<p>The Dichotomous optimizer will search for the combination of parameters
+that will lead to the best score. For each parameters that must be
+optimized, a tuple is provided representing the range in between the
+algorithm must search.</p>
+<p>When the search is complete, the process is repeated in between to two
+best combination of parameters in order to yields more accurate results.</p>
+<dl class="method">
+<dt id="sed_tool.optimizers.DichotomicOptimizer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>y_true: numpy.array</em>, <em>y_pred: numpy.array</em>, <em>filenames: list</em>, <em>monitor: str = 'f_measure'</em>, <em>verbose: int = 1</em>, <em>method: str = 'threshold'</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#DichotomicOptimizer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.DichotomicOptimizer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the thread pool and perform the optimization.*</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">y_true (np.array): The ground truth, Must be in one of the format
+y_pred (np.array): The prediction that must be segmented by the
+filenames (list): A list of filename in the same order than y_pred
+monitor (str): The metrics to maximize
+verbose (int): 0 –&gt; No verbose at all, 1 –&gt; tqdm terminal</p>
+<blockquote>
+<div>progress, 2 –&gt; tqdm notebook progress bar</div></blockquote>
+<p class="last">method (str):</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.DichotomicOptimizer.nb_iteration">
+<code class="descname">nb_iteration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#DichotomicOptimizer.nb_iteration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.DichotomicOptimizer.nb_iteration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.DichotomicOptimizer.param_to_range">
+<code class="descname">param_to_range</code><span class="sig-paren">(</span><em>param: dict</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#DichotomicOptimizer.param_to_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.DichotomicOptimizer.param_to_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Giving a tuple representing the minimum and the maximum value of a
+parameters, will generate, uniformly a list of value to test.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param (dict): The parameters to optimize</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.DichotomicOptimizer.two_best">
+<code class="descname">two_best</code><span class="sig-paren">(</span><em>source: dict</em>, <em>keys: list</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#DichotomicOptimizer.two_best"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.DichotomicOptimizer.two_best" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the new range (tuples) for each parameters based on the two
+best results</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>source (dict): The combination of parameters, the keys are a tuple
+keys (list): The list of combination</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sed_tool.optimizers.GenOptimizer">
+<em class="property">class </em><code class="descclassname">sed_tool.optimizers.</code><code class="descname">GenOptimizer</code><span class="sig-paren">(</span><em>param: dict</em>, <em>encoder: sed_tool.Encoder.Encoder</em>, <em>step: int</em>, <em>nb_recurse: int</em>, <em>nb_process: int = 4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#GenOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.GenOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sed_tool.optimizers.Optimizer" title="sed_tool.optimizers.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sed_tool.optimizers.Optimizer</span></code></a></p>
+<dl class="method">
+<dt id="sed_tool.optimizers.GenOptimizer.find_best_combination">
+<code class="descname">find_best_combination</code><span class="sig-paren">(</span><em>source: dict</em>, <em>keys: list</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#GenOptimizer.find_best_combination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.GenOptimizer.find_best_combination" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>source:
+keys:</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.GenOptimizer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>y_true: numpy.array</em>, <em>y_pred: numpy.array</em>, <em>filenames: list</em>, <em>monitor: str = 'f_measure'</em>, <em>verbose: int = 1</em>, <em>method: str = 'threshold'</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#GenOptimizer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.GenOptimizer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>y_true (np.array):
+y_pred (np.array):
+filenames (list):
+monitor (str):
+verbose (int):
+method (str):</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.GenOptimizer.nb_iteration">
+<code class="descname">nb_iteration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#GenOptimizer.nb_iteration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.GenOptimizer.nb_iteration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.GenOptimizer.param_to_range">
+<code class="descname">param_to_range</code><span class="sig-paren">(</span><em>param</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#GenOptimizer.param_to_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.GenOptimizer.param_to_range" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Generate a random normal distribution clipped by the range describe</dt>
+<dd>in the tuple.</dd>
+<dt>Args:</dt>
+<dd>param (dict): The parameters to optimize</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.GenOptimizer.pick_random_combination">
+<code class="descname">pick_random_combination</code><span class="sig-paren">(</span><em>search_space: dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#GenOptimizer.pick_random_combination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.GenOptimizer.pick_random_combination" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sed_tool.optimizers.Optimizer">
+<em class="property">class </em><code class="descclassname">sed_tool.optimizers.</code><code class="descname">Optimizer</code><span class="sig-paren">(</span><em>param: dict</em>, <em>encoder: sed_tool.Encoder.Encoder</em>, <em>step: int</em>, <em>nb_recurse: int</em>, <em>nb_process: int = 4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#Optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.Optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>The Dichotomous optimizer will search for the combination of parameters
+that will lead to the best score. For each parameters that must be
+optimized, a tuple is provided representing the range in between the
+algorithm must search.</p>
+<p>When the search is complete, the process is repeated in between to two
+best combination of parameters in order to yields more accurate results.</p>
+<dl class="attribute">
+<dt id="sed_tool.optimizers.Optimizer.best">
+<code class="descname">best</code><a class="headerlink" href="#sed_tool.optimizers.Optimizer.best" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the combination of parameters that yeld the best score using the
+monitored metric</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>tuple (parameters, score)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.Optimizer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>y_true: numpy.array</em>, <em>y_pred: numpy.array</em>, <em>filenames: list</em>, <em>monitor: str = 'f_measure'</em>, <em>verbose: int = 1</em>, <em>method: str = 'threshold'</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#Optimizer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.Optimizer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the thread pool and perform the optimization.*</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">y_true (np.array): The ground truth, Must be in one of the format
+y_pred (np.array): The prediction that must be segmented by the
+filenames (list): A list of filename in the same order than y_pred
+monitor (str):
+verbose (int): 0 –&gt; No verbose at all, 1 –&gt; tqdm terminal</p>
+<blockquote>
+<div>progress, 2 –&gt; tqdm notebook progress bar</div></blockquote>
+<p class="last">method (str):</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sed_tool.optimizers.Optimizer.history">
+<code class="descname">history</code><a class="headerlink" href="#sed_tool.optimizers.Optimizer.history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the complete history of the optimization process, useful for
+visualization of the optimization process. Work only if an optimization
+process have been already done</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>a list of dict, see sed_eval documentation for further detail</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sed_tool.optimizers.Optimizer.nb_iteration">
+<code class="descname">nb_iteration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/optimizers.html#Optimizer.nb_iteration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.Optimizer.nb_iteration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.optimizers.evaluate">
+<code class="descclassname">sed_tool.optimizers.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>combination: tuple</em>, <em>keys: list</em>, <em>method: str</em>, <em>encoder: sed_tool.Encoder.Encoder</em>, <em>y_true: numpy.array</em>, <em>y_pred: numpy.array</em>, <em>filenames: list</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/sed_tool/optimizers.html#evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.optimizers.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the segments using the given parameters and then compute all the
+metrics using the sed_eval toolbox.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>combination (tuple):
+keys (list):
+method (str):
+encoder (Encoder):
+y_true (np.array):
+y_pred (np.array):
+filenames (list):</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sed_tool.sed_tools">
+<span id="sed-tool-sed-tools-module"></span><h2>sed_tool.sed_tools module<a class="headerlink" href="#module-sed_tool.sed_tools" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="sed_tool.sed_tools.convert_to_mdc">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">convert_to_mdc</code><span class="sig-paren">(</span><em>event_list</em><span class="sig-paren">)</span> &#x2192; dcase_util.containers.metadata.MetaDataContainer<a class="reference internal" href="_modules/sed_tool/sed_tools.html#convert_to_mdc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.convert_to_mdc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since the user can provide the reference and estimates event list in
+different format, We must convert them into MetaDataContainer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>event_list: The event list into one of the possible format</dd>
+<dt>Returns:</dt>
+<dd>MetaDataContainer</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.sed_tools.eb_evaluator">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">eb_evaluator</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em>, <em>t_collar: float = 0.2</em>, <em>percentage_of_length: float = 0.2</em><span class="sig-paren">)</span> &#x2192; sed_eval.sound_event.EventBasedMetrics<a class="reference internal" href="_modules/sed_tool/sed_tools.html#eb_evaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.eb_evaluator" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Return an evaluator function depending on the type of the data provided.
+Different type of data are possible to use. Sed_eval event based metrics.</p>
+<p># Exemple
+# A list of string
+estimated_event_list = [</p>
+<blockquote>
+<div>[“file_1.wav    1.00    2.00dog”],
+[“file_2.wav    1.56    1.92cat”]</div></blockquote>
+<p>]</p>
+<p># A string
+estimated_event_list = “file_1.wav  1.00    2.00dog</p>
+</div></blockquote>
+<p>” +         “file_2.wav 1.56    1.92cat”</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>y_true: The ground truth
+y_pred: The prediction (results of the encode function)
+t_collar (float): Time collar used when evaluating validity of the onset
+and offset, in seconds. Default value 0.2
+percentage_of_length (float): Second condition, percentage of the
+length within which the estimated offset has to be in order to be
+consider valid estimation. Default value 0.2</dd>
+<dt>Returns:</dt>
+<dd>EventBasedMetrics: <strong>event_based_metric</strong></dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.sed_tools.event_based_evaluation">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">event_based_evaluation</code><span class="sig-paren">(</span><em>reference_event_list</em>, <em>estimated_event_list</em>, <em>t_collar: float</em>, <em>percentage_of_length: float</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/sed_tools.html#event_based_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.event_based_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate sed_eval event based metric for challenge</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>reference_event_list (MetaDataContainer, list of referenced events):
+estimated_event_list (MetaDataContainer, list of estimated events):</dd>
+<dt>Returns:</dt>
+<dd>EventBasedMetrics: <strong>event_based_metric</strong></dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.sed_tools.list_string_to_mdc">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">list_string_to_mdc</code><span class="sig-paren">(</span><em>event_list: list</em><span class="sig-paren">)</span> &#x2192; dcase_util.containers.metadata.MetaDataContainer<a class="reference internal" href="_modules/sed_tool/sed_tools.html#list_string_to_mdc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.list_string_to_mdc" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the data is under the form of a list of strings. The information contain
+in each line must be separated using one of this separator : “,”, “;”,
+”   “. It will be automatically detected.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>event_list (str): The string to convert into a MetaDataContainer</dd>
+<dt>Returns:</dt>
+<dd>MetaDataContainer</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.sed_tools.sb_evaluator">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">sb_evaluator</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em>, <em>time_resolution</em><span class="sig-paren">)</span> &#x2192; sed_eval.sound_event.SegmentBasedMetrics<a class="reference internal" href="_modules/sed_tool/sed_tools.html#sb_evaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.sb_evaluator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.sed_tools.segment_based_evaluation">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">segment_based_evaluation</code><span class="sig-paren">(</span><em>reference_event_list</em>, <em>estimated_event_list</em>, <em>time_resolution</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sed_tool/sed_tools.html#segment_based_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.segment_based_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sed_tool.sed_tools.string_to_mdc">
+<code class="descclassname">sed_tool.sed_tools.</code><code class="descname">string_to_mdc</code><span class="sig-paren">(</span><em>event_strings: str</em><span class="sig-paren">)</span> &#x2192; dcase_util.containers.metadata.MetaDataContainer<a class="reference internal" href="_modules/sed_tool/sed_tools.html#string_to_mdc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sed_tool.sed_tools.string_to_mdc" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>If the data is under the form of a long string with several line (</div></blockquote>
+<dl class="docutils">
+<dt>).</dt>
+<dd><p class="first">The information contain in each line must be separated using one of this
+separator : “,”, “;”, ”     “. It will be automatically detected.</p>
+<dl class="last docutils">
+<dt>Args:</dt>
+<dd>event_strings (str): The string to convert into a MetaDataContainer</dd>
+<dt>Returns:</dt>
+<dd>MetaDataContainer</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sed_tool">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sed_tool" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, leo cances
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

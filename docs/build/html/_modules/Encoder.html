@@ -1,0 +1,995 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Encoder &mdash; sed_tools  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sed_tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sed_tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>Encoder</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Encoder</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections.abc</span> <span class="k">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../index.html#Encoder.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Allow the localization in time of sound events using temporal prediction.</span>
+
+<span class="sd">    In a sound event detection task, the output of the prediction model is</span>
+<span class="sd">    often a temporal prediction. Different segmentation algorithm exist in order</span>
+<span class="sd">    to translate this curves into a list of segment. This encoder give you access</span>
+<span class="sd">    to most of them in a fairly easy way.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Encoder.__init__"><a class="viewcode-back" href="../index.html#Encoder.Encoder.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">temporal_precision</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">clip_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">minimal_segment_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">t_collar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.200</span><span class="p">,</span>
+                 <span class="n">percentage_of_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+                 <span class="n">time_resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.00</span><span class="p">,</span>
+                 <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;event_based_metrics&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialization of the encoder.</span>
+
+<span class="sd">        To initialize the encoder, you must provide the list of the classes that</span>
+<span class="sd">        each curve will represent, in the same order along with information</span>
+<span class="sd">        about the curves and the precision of the segmentation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            classes (list):</span>
+<span class="sd">                The list of class that each curves will represent</span>
+<span class="sd">                It is require for the function parse.</span>
+<span class="sd">            temporal_precision (int):</span>
+<span class="sd">                The temporal prediction for each classes.</span>
+<span class="sd">            clip_length (int):</span>
+<span class="sd">                The length of the audio file (in seconds).</span>
+<span class="sd">            minimal_segment_step (int):</span>
+<span class="sd">                The minimum space in between two segments.</span>
+
+<span class="sd">        .. todo:: Implement alternative way to provide the data (dict)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temporal_precision</span> <span class="o">=</span> <span class="n">temporal_precision</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clip_length</span> <span class="o">=</span> <span class="n">clip_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimal_segment_step</span> <span class="o">=</span> <span class="n">minimal_segment_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_collar</span> <span class="o">=</span> <span class="n">t_collar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percentage_of_length</span> <span class="o">=</span> <span class="n">percentage_of_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_resolution</span> <span class="o">=</span> <span class="n">time_resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+
+        <span class="c1"># Attribute that are not initialize with the constructor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_length</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_frame</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_correspondence</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_correspondence_reverse</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)),</span> <span class="n">classes</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Encoder.encode"><a class="viewcode-back" href="../index.html#Encoder.Encoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;threshold&quot;</span><span class="p">,</span>
+               <span class="n">smooth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Perform the localization of the sound event present in the file.</span>
+
+<span class="sd">        Using the temporal prediction provided y the last step of the system,</span>
+<span class="sd">        it will &quot;localize&quot; the sound event inside the file under the form of a</span>
+<span class="sd">        strongly annotated line. (see DCASE2018 task 4 strong label exemple).</span>
+<span class="sd">        There is two methods implemented here, one using a simple threshold</span>
+<span class="sd">        based segmentation and an other using a modulation system based on the</span>
+<span class="sd">        variance of the prediction over the time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for</span>
+<span class="sd">                probabilities that need to segmented. must be a three dimensional</span>
+<span class="sd">                numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            method (str):</span>
+<span class="sd">                The segmentation method to use</span>
+<span class="sd">                [threshold | hysteresis | derivative | primitive |</span>
+<span class="sd">                mean_threshold | global_mean_threshold | median_threshold |</span>
+<span class="sd">                gobal_median_threshold].</span>
+<span class="sd">            smooth (str):</span>
+<span class="sd">                The smoothing method to use [smoothMovingAvg].</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">                See the segmentation method parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a list of positive and negative segments with their size. A</span>
+<span class="sd">            segment is a tuple where the first value that represent the segment</span>
+<span class="sd">            value (1) for positive, (0) for negative and the second values is</span>
+<span class="sd">            the width of the segment (number of frame).</span>
+
+<span class="sd">        :Exemple:</span>
+
+<span class="sd">        ```YOTsn73eqbfc_10.000_20.000.wav  0.163   0.665   Alarm_bell_ringing```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># parameters verification</span>
+        <span class="n">_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">,</span> <span class="s2">&quot;hysteresis&quot;</span><span class="p">,</span> <span class="s2">&quot;derivative&quot;</span><span class="p">,</span> <span class="s2">&quot;mean_threshold&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;median_threshold&quot;</span><span class="p">,</span> <span class="s2">&quot;dynamic_threshold&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;global_mean_threshold&quot;</span><span class="p">,</span> <span class="s2">&quot;global_median_threshold&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_methods</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Method </span><span class="si">%s</span><span class="s2"> doesn&#39;t exist. Only </span><span class="si">%s</span><span class="s2"> are available&quot;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">_methods</span><span class="p">))</span>
+
+        <span class="c1"># Depending on the method selected, the proper function will be selected</span>
+        <span class="n">encoder</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_threshold</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_using_derivative</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_hysteresis</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_mean_threshold</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_gmean_threshold</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_median_treshold</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_dynamic_threshold</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_gmedian_threshold</span>
+
+        <span class="c1"># Apply smoothing if requested</span>
+        <span class="k">if</span> <span class="n">smooth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temporal_prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth</span><span class="p">(</span><span class="n">temporal_prediction</span><span class="p">,</span>
+                                                <span class="n">method</span><span class="o">=</span><span class="n">smooth</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Now that we have the strong prediction, we can assign the value to the</span>
+        <span class="c1"># two attributes nb_frame and frame_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_frame</span> <span class="o">=</span> <span class="n">temporal_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_length</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_frame</span>
+
+        <span class="c1"># Execute the selected segmentation algorithm and recover its results</span>
+        <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="n">temporal_prediction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Encoder.parse"><a class="viewcode-back" href="../index.html#Encoder.Encoder.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_segments</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">test_files_name</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Transform a list of segment into a string ready for evaluation with</span>
+<span class="sd">        sed_eval.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            all_segments (list): a list of dict of 10 key. the list length is equal to the number of file, the dict \</span>
+<span class="sd">                number test_files_name.</span>
+<span class="sd">            (list): The list of the file names in the same.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">clipIndex</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_segments</span><span class="p">)):</span>
+            <span class="n">clip</span> <span class="o">=</span> <span class="n">all_segments</span><span class="p">[</span><span class="n">clipIndex</span><span class="p">]</span>
+
+            <span class="n">empty_cls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">clip</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clip</span><span class="p">[</span><span class="bp">cls</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">clip</span><span class="p">[</span><span class="bp">cls</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">empty_cls</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">empty_cls</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">test_files_name</span><span class="p">[</span><span class="n">clipIndex</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">clip</span><span class="p">:</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">clip</span><span class="p">[</span><span class="bp">cls</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+                            <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">test_files_name</span><span class="p">[</span><span class="n">clipIndex</span><span class="p">],</span>
+                                <span class="n">start</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_length</span><span class="p">,</span>
+                                <span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_length</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">class_correspondence_reverse</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+                            <span class="p">)</span>
+                        <span class="n">start</span> <span class="o">+=</span> <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+    <span class="c1"># ==================================================================================================================</span>
+    <span class="c1">#</span>
+    <span class="c1">#       ENCODING METHODS</span>
+    <span class="c1">#</span>
+    <span class="c1"># ==================================================================================================================</span>
+<div class="viewcode-block" id="Encoder._encode_using_derivative"><a class="viewcode-back" href="../index.html#Encoder.Encoder._encode_using_derivative">[docs]</a>    <span class="k">def</span> <span class="nf">_encode_using_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                 <span class="n">rising</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">decreasing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>
+                                 <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+                                 <span class="n">padding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;same&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The derivative create segment based on the intensity of the variation of the temporal prediction curve. \</span>
+<span class="sd">        If the prediction rise above a certain threshold `rising` then a valid segment start. If it decrease faster \</span>
+<span class="sd">        than the `decreasing` threshold, then a valid segment finish. If the prediction start with a high value, \</span>
+<span class="sd">        of rise slowly but high, then an absolute (and global) threshold `high` is used. (it works like a normal \</span>
+<span class="sd">        threhsold).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;).</span>
+<span class="sd">            rising (float): Must be between 0 and 1, rising threshold. When the decreasing (float): Must be between 0 \</span>
+<span class="sd">                and 1, decreasing threshold.</span>
+<span class="sd">            window_size (int): size of the processing window.</span>
+<span class="sd">            high (float): minimum prediction value that trigger a valid.</span>
+<span class="sd">            padding (str): The padding method to used on the curves.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The result of the system under the form of a strong annotation text where each represent on timed event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># for class-dependant parameters</span>
+        <span class="n">window_sizes</span> <span class="o">=</span> <span class="n">window_size</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">window_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">window_size</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="n">risings</span> <span class="o">=</span> <span class="n">rising</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rising</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">risings</span> <span class="o">=</span> <span class="p">[</span><span class="n">rising</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="n">decreasings</span> <span class="o">=</span> <span class="n">decreasing</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decreasing</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">decreasings</span> <span class="o">=</span> <span class="p">[</span><span class="n">decreasing</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="n">highs</span> <span class="o">=</span> <span class="n">high</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">highs</span> <span class="o">=</span> <span class="p">[</span><span class="n">high</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">temporal_prediction</span><span class="p">:</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">labeled</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">cls_ind</span><span class="p">,</span> <span class="n">prediction_per_class</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+                <span class="c1"># get class-dependant parameters</span>
+                <span class="n">_window_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window_sizes</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">])</span>
+                <span class="n">_rising</span> <span class="o">=</span> <span class="n">risings</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]</span>
+                <span class="n">_decreasing</span> <span class="o">=</span> <span class="n">decreasings</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]</span>
+                <span class="n">_high</span> <span class="o">=</span> <span class="n">highs</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]</span>
+
+                <span class="n">padded_prediction_per_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pad</span><span class="p">(</span><span class="n">prediction_per_class</span><span class="p">,</span>
+                                                         <span class="n">_window_size</span><span class="p">,</span>
+                                                         <span class="n">method</span><span class="o">=</span><span class="n">padding</span><span class="p">)</span>
+
+                <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">padded_prediction_per_class</span><span class="p">)</span> <span class="o">-</span> <span class="n">_window_size</span><span class="p">):</span>
+                    <span class="n">window</span> <span class="o">=</span> <span class="n">padded_prediction_per_class</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">_window_size</span><span class="p">]</span>
+                    <span class="n">slope</span> <span class="o">=</span> <span class="p">(</span><span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">_window_size</span>
+
+                    <span class="c1"># first element</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">_high</span><span class="p">:</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+                    <span class="c1"># if on &quot;high&quot; segment</span>
+                    <span class="k">if</span> <span class="n">segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+                        <span class="c1"># if above high threshol</span>
+                        <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">_high</span><span class="p">:</span>
+                            <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># if decreasing threshold is reach</span>
+                            <span class="k">if</span> <span class="n">slope</span> <span class="o">&lt;</span> <span class="n">_decreasing</span><span class="p">:</span>
+                                <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                                <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># if on &quot;low&quot; segment</span>
+                    <span class="k">else</span><span class="p">:</span>
+
+                        <span class="c1"># if above high threshold</span>
+                        <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">_high</span><span class="p">:</span>
+                            <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                            <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">slope</span> <span class="o">&gt;</span> <span class="n">_rising</span><span class="p">:</span>
+                                <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                                <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+                <span class="n">labeled</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="n">segments</span>
+                <span class="bp">cls</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labeled</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+    <span class="k">def</span> <span class="nf">__encode_using_hysteresis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                  <span class="n">low</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span>
+                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The hysteresis based segmentation algorithm require two thresholds. A high value to decided when the \</span>
+<span class="sd">        segment should start and a low value to decided when to finish the segment. It perform better when the temporal \</span>
+<span class="sd">        prediction is noisy.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;).</span>
+<span class="sd">            low (float): low threshold (can be a list for class-dependant thresholding)</span>
+<span class="sd">            high (float): high threshold (can ve a list for class-dependant thresholding)</span>
+<span class="sd">            kwargs: Extra arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            the result of the system under the form of a strong annotation text where each line represent on timed event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># In case of class dependant thresholding</span>
+        <span class="n">lows</span> <span class="o">=</span> <span class="n">low</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">lows</span> <span class="o">=</span> <span class="p">[</span><span class="n">low</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="n">highs</span> <span class="o">=</span> <span class="n">high</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">highs</span> <span class="o">=</span> <span class="p">[</span><span class="n">high</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">temporal_prediction</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">prediction</span><span class="p">:</span>
+            <span class="n">labeled</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="bp">cls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">cls_ind</span><span class="p">,</span> <span class="n">prediction_per_class</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+                <span class="n">converted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prediction_per_class</span><span class="p">)):</span>
+                    <span class="n">element</span> <span class="o">=</span> <span class="n">prediction_per_class</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                    <span class="c1"># first element</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">element</span> <span class="o">&gt;</span> <span class="n">highs</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]:</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+                    <span class="c1"># then</span>
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">&gt;</span> <span class="n">highs</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                            <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+                    <span class="k">elif</span> <span class="n">lows</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">element</span><span class="p">:</span>
+                        <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                            <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">segment</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+                <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+
+                <span class="n">labeled</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="n">converted</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">cls</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labeled</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">__encode_using_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                 <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;A basic threshold segmentation algorithm.</span>
+
+<span class="sd">        For each frame where the probability is above the given threshold, will be part of a valid segment, \</span>
+<span class="sd">        an invalid one otherwise. The threshold can be set globally (one unique threshold for all the \</span>
+<span class="sd">        classes) or independantely (one threshold for each classes)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            threshold (float or list): One unique threshold or a list of threhsold. If using a list, it must define \</span>
+<span class="sd">                one threshold for each class.</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="n">threshold</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">thresholds</span> <span class="o">=</span> <span class="p">[</span><span class="n">threshold</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="n">bin_prediction</span> <span class="o">=</span> <span class="n">temporal_prediction</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">bin_prediction</span><span class="p">[</span><span class="n">bin_prediction</span> <span class="o">&gt;</span> <span class="n">thresholds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">bin_prediction</span><span class="p">[</span><span class="n">bin_prediction</span> <span class="o">&lt;=</span> <span class="n">thresholds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Merging &quot;hole&quot; that are smaller than 200 ms</span>
+        <span class="n">step_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_length</span> <span class="o">/</span> <span class="n">temporal_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">max_hole_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimal_segment_step</span> <span class="o">/</span> <span class="n">step_length</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">bin_prediction</span><span class="p">:</span>
+            <span class="n">labeled</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="bp">cls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">bin_prediction_per_class</span> <span class="ow">in</span> <span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">:</span>
+                <span class="c1"># convert the binarized list into a list of tuple representing</span>
+                <span class="c1"># the element and it&#39;s number of occurrence. The order is</span>
+                <span class="c1"># conserved and the total sum should be equal to 10s</span>
+
+                <span class="c1"># first pass --&gt; Fill the holes</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_prediction_per_class</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_hole_size</span><span class="p">):</span>
+                    <span class="n">window</span> <span class="o">=</span> <span class="n">bin_prediction_per_class</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">max_hole_size</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">window</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="n">max_hole_size</span>
+
+                <span class="c1"># second pass --&gt; split into segments</span>
+                <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">previous_elt</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">bin_prediction_per_class</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">previous_elt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">previous_elt</span> <span class="o">=</span> <span class="n">element</span>
+                        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="n">previous_elt</span><span class="p">:</span>
+                        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">previous_elt</span><span class="p">,</span> <span class="n">cpt</span><span class="p">))</span>
+                        <span class="n">previous_elt</span> <span class="o">=</span> <span class="n">element</span>
+                        <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="c1"># case where the class is detect during the whole clip</span>
+                <span class="c1">#                 if nbSegment == 1:</span>
+                <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">previous_elt</span><span class="p">,</span> <span class="n">cpt</span><span class="p">))</span>
+
+                <span class="n">labeled</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="n">converted</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">cls</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labeled</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">__encode_using_gmean_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                       <span class="n">independent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Using all the temporal prediction, the mean of each curve and for each class is computed and will \</span>
+<span class="sd">         be choose as threshold. Then call the `__encode_using_threshold` function to apply it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">total_thresholds</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">temporal_prediction</span><span class="p">:</span>
+            <span class="n">total_thresholds</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">curve</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">])</span>
+
+        <span class="n">total_thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_thresholds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">independent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_threshold</span><span class="p">(</span>
+                <span class="n">temporal_prediction</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">total_thresholds</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_threshold</span><span class="p">(</span>
+                <span class="n">temporal_prediction</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="p">[</span><span class="n">total_thresholds</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__encode_using_gmedian_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                         <span class="n">independent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                                         <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Using all the temporal prediction, the mean of each curve and for each class is compted and will be \</span>
+<span class="sd">        choose as threshold. Then call the `__encoder_using_threshold` function to apply it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">total_thresholds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">temporal_prediction</span><span class="p">:</span>
+            <span class="c1"># compute unique threshold for this file</span>
+            <span class="n">total_thresholds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">curve</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">])</span>
+
+        <span class="n">total_thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_thresholds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">independent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_threshold</span><span class="p">(</span>
+                <span class="n">temporal_prediction</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">total_thresholds</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__encode_using_threshold</span><span class="p">(</span>
+                <span class="n">temporal_prediction</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="p">[</span><span class="n">total_thresholds</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__encode_using_mean_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                      <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; This algorithm is similar to the global mean threshold but will compute new threshold(s) (global or \</span>
+<span class="sd">        independent) for each files.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            kwargs:</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            the result of the system under the form of a strong annotation text where each line represent on timed event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Recover the kwargs arguments</span>
+        <span class="n">_global</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Merging &quot;hole&quot; that are smaller than 200 ms</span>
+        <span class="n">step_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_length</span> <span class="o">/</span> <span class="n">temporal_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">max_hole_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temporal_precision</span> <span class="o">/</span> <span class="n">step_length</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">temporal_prediction</span><span class="p">:</span>
+            <span class="n">labeled</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">_clip</span> <span class="o">=</span> <span class="n">clip</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># compute unique threshold for this file globally or independent</span>
+            <span class="n">thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curve</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">_clip</span><span class="o">.</span><span class="n">T</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">_global</span><span class="p">:</span>
+                <span class="n">thresholds</span> <span class="o">=</span> <span class="p">[</span><span class="n">thresholds</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+            <span class="c1"># Binarize using the given thresholds</span>
+            <span class="k">if</span> <span class="n">thresholds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_clip</span><span class="p">[</span><span class="n">_clip</span> <span class="o">&gt;</span> <span class="n">thresholds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">_clip</span><span class="p">[</span><span class="n">_clip</span> <span class="o">&lt;=</span> <span class="n">thresholds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="bp">cls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">binPredictionPerClass</span> <span class="ow">in</span> <span class="n">_clip</span><span class="o">.</span><span class="n">T</span><span class="p">:</span>
+                <span class="c1"># convert the binarized list into a list of tuple representing</span>
+                <span class="c1"># the element and it&#39;s number of # occurrence. The order is</span>
+                <span class="c1"># conserved and the total sum should be equal to 10s</span>
+
+                <span class="c1"># first pass --&gt; Fill the holes</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binPredictionPerClass</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_hole_size</span><span class="p">):</span>
+                    <span class="n">window</span> <span class="o">=</span> <span class="n">binPredictionPerClass</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">max_hole_size</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">window</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="n">max_hole_size</span>
+
+                <span class="c1"># second pass --&gt; split into segments</span>
+                <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">previous_elt</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">binPredictionPerClass</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">previous_elt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">previous_elt</span> <span class="o">=</span> <span class="n">element</span>
+                        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="n">previous_elt</span><span class="p">:</span>
+                        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">previous_elt</span><span class="p">,</span> <span class="n">cpt</span><span class="p">))</span>
+                        <span class="n">previous_elt</span> <span class="o">=</span> <span class="n">element</span>
+                        <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="c1"># case where the class is detect during the whole clip</span>
+                <span class="c1">#                 if nb_segment == 1:</span>
+                <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">previous_elt</span><span class="p">,</span> <span class="n">cpt</span><span class="p">))</span>
+
+                <span class="n">labeled</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="n">converted</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">cls</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labeled</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">__encode_using_median_treshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; This algorithm is similar to the global median threshold but will compute new threshold(s) (global or \</span>
+<span class="sd">        independent) for each files.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \</span>
+<span class="sd">                three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            kwargs:</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The result of the system under the form of a strong annotation text where each line represent one time event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Recover the kwargs arguments</span>
+        <span class="n">_global</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Merging &quot;hole&quot; that are smaller than 200 ms</span>
+        <span class="n">step_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_length</span> <span class="o">/</span> <span class="n">temporal_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">max_hole_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temporal_precision</span> <span class="o">/</span> <span class="n">step_length</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">temporal_prediction</span><span class="p">:</span>
+            <span class="n">labeled</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">_clip</span> <span class="o">=</span> <span class="n">clip</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># compute unique threshold for this file</span>
+            <span class="n">thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curve</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">_global</span><span class="p">:</span>
+                <span class="n">thresholds</span> <span class="o">=</span> <span class="p">[</span><span class="n">thresholds</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+            <span class="c1"># Binarize using the given thresholds</span>
+            <span class="k">if</span> <span class="n">thresholds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_clip</span><span class="p">[</span><span class="n">_clip</span> <span class="o">&gt;</span> <span class="n">thresholds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">_clip</span><span class="p">[</span><span class="n">_clip</span> <span class="o">&lt;=</span> <span class="n">thresholds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="bp">cls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">binPredictionPerClass</span> <span class="ow">in</span> <span class="n">_clip</span><span class="o">.</span><span class="n">T</span><span class="p">:</span>
+                <span class="c1"># convert the binarized list into a list of tuple representing</span>
+                <span class="c1"># the element and it&#39;s number of # occurrence. The order is</span>
+                <span class="c1"># conserved and the total sum should be equal to 10s</span>
+
+                <span class="c1"># first pass --&gt; Fill the holes</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binPredictionPerClass</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_hole_size</span><span class="p">):</span>
+                    <span class="n">window</span> <span class="o">=</span> <span class="n">binPredictionPerClass</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">max_hole_size</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">window</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="n">max_hole_size</span>
+
+                <span class="c1"># second pass --&gt; split into segments</span>
+                <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">previous_elt</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">binPredictionPerClass</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">previous_elt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">previous_elt</span> <span class="o">=</span> <span class="n">element</span>
+                        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">nb_segment</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="n">previous_elt</span><span class="p">:</span>
+                        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">previous_elt</span><span class="p">,</span> <span class="n">cpt</span><span class="p">))</span>
+                        <span class="n">previous_elt</span> <span class="o">=</span> <span class="n">element</span>
+                        <span class="n">nb_segment</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="c1"># case where the class is detect during the whole clip</span>
+                <span class="c1">#                 if nb_segment == 1:</span>
+                <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">previous_elt</span><span class="p">,</span> <span class="n">cpt</span><span class="p">))</span>
+
+                <span class="n">labeled</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="n">converted</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">cls</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labeled</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">__encode_using_dynamic_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; exemple documentation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The complete set for probabilities that need to segmented. \</span>
+<span class="sd">                must be a three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</span>
+<span class="sd">            kwargs: test</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="c1"># ==========================================================================</span>
+    <span class="c1">#</span>
+    <span class="c1">#       SMOOTHING AND UTILITIES</span>
+    <span class="c1">#</span>
+    <span class="c1"># ==========================================================================</span>
+    <span class="k">def</span> <span class="nf">__pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+              <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;same&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Pad and array using the methods given and a window_size.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            array (np.array): the array to pad</span>
+<span class="sd">            window_size (int): the size of the working window</span>
+<span class="sd">            method (str): methods of padding, two available &quot;same&quot; | &quot;reflect&quot;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            the padded array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">array</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;same&quot;</span><span class="p">:</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="n">missing</span><span class="p">)</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">array</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="n">missing</span><span class="p">)</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">first</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">last</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;valid&quot;</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">array</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;null&quot;</span><span class="p">:</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">missing</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">missing</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">start</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="c1"># ===============================================================================</span>
+    <span class="c1">#</span>
+    <span class="c1">#     SMOOTHING FUNCTIONS:</span>
+    <span class="c1">#</span>
+    <span class="c1"># ===============================================================================</span>
+    <span class="k">def</span> <span class="nf">__smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                 <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;smoothMovingAvg&quot;</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; For smoothing the curve of the prediction curves.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array): The temporalPrediction of the second model (TimeDistributed Dense output).</span>
+<span class="sd">            method (str): The algorithm to use for smoothing the curves.</span>
+<span class="sd">            kwargs: See argument list for the smoothing algorithm.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO give possibility to make a class-dependant smooth method</span>
+
+        <span class="c1"># the method can be class dependant</span>
+        <span class="c1">#methods = method</span>
+        <span class="c1">#if not isinstance(method, Iterable):</span>
+        <span class="c1">#    methods = [method] * len(self.classes)</span>
+
+        <span class="c1"># Check if methods asked exist</span>
+        <span class="n">_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;smoothMovingAvg&quot;</span><span class="p">,</span> <span class="s2">&quot;smoothMovingMedian&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_methods</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Method </span><span class="si">%s</span><span class="s2"> doesn&#39;t exist. Only </span><span class="si">%s</span><span class="s2"> available&quot;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">_methods</span><span class="p">))</span>
+
+        <span class="c1"># Create smoother (select the algorithm)</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">smoother</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth_moving_avg</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">_methods</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">smoother</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth_moving_median</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">return</span> <span class="n">smoother</span><span class="p">(</span><span class="n">temporal_prediction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__smooth_moving_median</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                               <span class="n">window_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">11</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array):</span>
+<span class="sd">            windows_len (int):</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__smooth_moving_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                            <span class="n">window_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;same&quot;</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Apply the smooth moving average on all class. Can be</span>
+<span class="sd">        class-dependant or not.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temporal_prediction (np.array):</span>
+<span class="sd">            window_len (int): The size of the smoothing window, can be</span>
+<span class="sd">            class-dependant if a list is given</span>
+<span class="sd">            padding (str): The padding mode to use</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_window_len</span><span class="p">):</span>
+            <span class="n">_window_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_window_len</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">_window_len</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data</span>
+
+            <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">_window_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">,</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="n">_window_len</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">]</span>
+
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">_window_len</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">w</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">s</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">padding</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">y</span><span class="p">[</span><span class="n">_window_len</span><span class="p">:</span><span class="o">-</span><span class="n">_window_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># core</span>
+        <span class="n">smoothed_temporal_prediction</span> <span class="o">=</span> <span class="n">temporal_prediction</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># In only one window len given, same for all class</span>
+        <span class="c1"># if nb window_len = nb cls --&gt; one for each class</span>
+        <span class="n">windows_len</span> <span class="o">=</span> <span class="n">window_len</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">window_len</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">windows_len</span> <span class="o">=</span> <span class="p">[</span><span class="n">window_len</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">clip_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">smoothed_temporal_prediction</span><span class="p">)):</span>
+            <span class="n">clip</span> <span class="o">=</span> <span class="n">smoothed_temporal_prediction</span><span class="p">[</span><span class="n">clip_ind</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">cls_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">)):</span>
+                <span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">clip</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">],</span> <span class="n">windows_len</span><span class="p">[</span><span class="n">cls_ind</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">smoothed_temporal_prediction</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Leo Cances
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

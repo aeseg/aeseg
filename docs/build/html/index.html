@@ -1,0 +1,458 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to sed_tools’s documentation! &mdash; sed_tools  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> sed_tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to sed_tools’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">sed_tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Welcome to sed_tools’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-sed-tools-s-documentation">
+<h1>Welcome to sed_tools’s documentation!<a class="headerlink" href="#welcome-to-sed-tools-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-Encoder"></span><dl class="class">
+<dt id="Encoder.Encoder">
+<em class="property">class </em><code class="sig-prename descclassname">Encoder.</code><code class="sig-name descname">Encoder</code><span class="sig-paren">(</span><em class="sig-param">classes: list</em>, <em class="sig-param">temporal_precision: int</em>, <em class="sig-param">clip_length: int</em>, <em class="sig-param">minimal_segment_step: int</em>, <em class="sig-param">t_collar: float = 0.2</em>, <em class="sig-param">percentage_of_length: float = 0.2</em>, <em class="sig-param">time_resolution: float = 1.0</em>, <em class="sig-param">method: str = 'event_based_metrics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Encoder.html#Encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Encoder.Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow the localization in time of sound events using temporal prediction.</p>
+<p>In a sound event detection task, the output of the prediction model is
+often a temporal prediction. Different segmentation algorithm exist in order
+to translate this curves into a list of segment. This encoder give you access
+to most of them in a fairly easy way.</p>
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_dynamic_threshold">
+<code class="sig-name descname">_Encoder__encode_using_dynamic_threshold</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_dynamic_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>exemple documentation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented.                 must be a three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)
+kwargs: test</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_gmean_threshold">
+<code class="sig-name descname">_Encoder__encode_using_gmean_threshold</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">independent: bool = False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_gmean_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using all the temporal prediction, the mean of each curve and for each class is computed and will          be choose as threshold. Then call the <cite>__encode_using_threshold</cite> function to apply it.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)
+kwargs:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_gmedian_threshold">
+<code class="sig-name descname">_Encoder__encode_using_gmedian_threshold</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">independent: bool = False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_gmedian_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using all the temporal prediction, the mean of each curve and for each class is compted and will be         choose as threshold. Then call the <cite>__encoder_using_threshold</cite> function to apply it.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)
+kwargs:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_hysteresis">
+<code class="sig-name descname">_Encoder__encode_using_hysteresis</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">low: float = 0.4</em>, <em class="sig-param">high: float = 0.6</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_hysteresis" title="Permalink to this definition">¶</a></dt>
+<dd><p>The hysteresis based segmentation algorithm require two thresholds. A high value to decided when the         segment should start and a low value to decided when to finish the segment. It perform better when the temporal         prediction is noisy.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;).
+low (float): low threshold (can be a list for class-dependant thresholding)
+high (float): high threshold (can ve a list for class-dependant thresholding)
+kwargs: Extra arguments</p>
+</dd>
+<dt>Returns:</dt><dd><p>the result of the system under the form of a strong annotation text where each line represent on timed event.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_mean_threshold">
+<code class="sig-name descname">_Encoder__encode_using_mean_threshold</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_mean_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>This algorithm is similar to the global mean threshold but will compute new threshold(s) (global or         independent) for each files.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)
+kwargs:</p>
+</dd>
+<dt>Returns:</dt><dd><p>the result of the system under the form of a strong annotation text where each line represent on timed event.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_median_treshold">
+<code class="sig-name descname">_Encoder__encode_using_median_treshold</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_median_treshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>This algorithm is similar to the global median threshold but will compute new threshold(s) (global or         independent) for each files.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)
+kwargs:</p>
+</dd>
+<dt>Returns:</dt><dd><p>The result of the system under the form of a strong annotation text where each line represent one time event.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__encode_using_threshold">
+<code class="sig-name descname">_Encoder__encode_using_threshold</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">threshold: float</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#Encoder.Encoder._Encoder__encode_using_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>A basic threshold segmentation algorithm.</p>
+<p>For each frame where the probability is above the given threshold, will be part of a valid segment,         an invalid one otherwise. The threshold can be set globally (one unique threshold for all the         classes) or independantely (one threshold for each classes)</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)
+threshold (float or list): One unique threshold or a list of threhsold. If using a list, it must define                 one threshold for each class.
+kwargs:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__pad">
+<code class="sig-name descname">_Encoder__pad</code><span class="sig-paren">(</span><em class="sig-param">array: numpy.array</em>, <em class="sig-param">window_size: int</em>, <em class="sig-param">method: str = 'same'</em><span class="sig-paren">)</span> &#x2192; numpy.array<a class="headerlink" href="#Encoder.Encoder._Encoder__pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad and array using the methods given and a window_size.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>array (np.array): the array to pad
+window_size (int): the size of the working window
+method (str): methods of padding, two available “same” | “reflect”</p>
+</dd>
+<dt>Returns:</dt><dd><p>the padded array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__smooth">
+<code class="sig-name descname">_Encoder__smooth</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">method: str = 'smoothMovingAvg'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; numpy.array<a class="headerlink" href="#Encoder.Encoder._Encoder__smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>For smoothing the curve of the prediction curves.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The temporalPrediction of the second model (TimeDistributed Dense output).
+method (str): The algorithm to use for smoothing the curves.
+kwargs: See argument list for the smoothing algorithm.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__smooth_moving_avg">
+<code class="sig-name descname">_Encoder__smooth_moving_avg</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">window_len: int = 5</em>, <em class="sig-param">padding: str = 'same'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#Encoder.Encoder._Encoder__smooth_moving_avg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the smooth moving average on all class. Can be
+class-dependant or not.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array):
+window_len (int): The size of the smoothing window, can be
+class-dependant if a list is given
+padding (str): The padding mode to use
+kwargs:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._Encoder__smooth_moving_median">
+<code class="sig-name descname">_Encoder__smooth_moving_median</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">window_len: int = 11</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#Encoder.Encoder._Encoder__smooth_moving_median" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array):
+windows_len (int):
+kwargs:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Encoder.Encoder.__dict__">
+<code class="sig-name descname">__dict__</code><em class="property"> = mappingproxy({'__module__': 'Encoder', '__doc__': ' Allow the localization in time of sound events using temporal prediction.\n\n    In a sound event detection task, the output of the prediction model is\n    often a temporal prediction. Different segmentation algorithm exist in order\n    to translate this curves into a list of segment. This encoder give you access\n    to most of them in a fairly easy way.\n\n    ', '__init__': &lt;function Encoder.__init__&gt;, 'encode': &lt;function Encoder.encode&gt;, 'parse': &lt;function Encoder.parse&gt;, '_encode_using_derivative': &lt;function Encoder._encode_using_derivative&gt;, '_Encoder__encode_using_hysteresis': &lt;function Encoder.__encode_using_hysteresis&gt;, '_Encoder__encode_using_threshold': &lt;function Encoder.__encode_using_threshold&gt;, '_Encoder__encode_using_gmean_threshold': &lt;function Encoder.__encode_using_gmean_threshold&gt;, '_Encoder__encode_using_gmedian_threshold': &lt;function Encoder.__encode_using_gmedian_threshold&gt;, '_Encoder__encode_using_mean_threshold': &lt;function Encoder.__encode_using_mean_threshold&gt;, '_Encoder__encode_using_median_treshold': &lt;function Encoder.__encode_using_median_treshold&gt;, '_Encoder__encode_using_dynamic_threshold': &lt;function Encoder.__encode_using_dynamic_threshold&gt;, '_Encoder__pad': &lt;function Encoder.__pad&gt;, '_Encoder__smooth': &lt;function Encoder.__smooth&gt;, '_Encoder__smooth_moving_median': &lt;function Encoder.__smooth_moving_median&gt;, '_Encoder__smooth_moving_avg': &lt;function Encoder.__smooth_moving_avg&gt;, '__dict__': &lt;attribute '__dict__' of 'Encoder' objects&gt;, '__weakref__': &lt;attribute '__weakref__' of 'Encoder' objects&gt;})</em><a class="headerlink" href="#Encoder.Encoder.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">classes: list</em>, <em class="sig-param">temporal_precision: int</em>, <em class="sig-param">clip_length: int</em>, <em class="sig-param">minimal_segment_step: int</em>, <em class="sig-param">t_collar: float = 0.2</em>, <em class="sig-param">percentage_of_length: float = 0.2</em>, <em class="sig-param">time_resolution: float = 1.0</em>, <em class="sig-param">method: str = 'event_based_metrics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Encoder.html#Encoder.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Encoder.Encoder.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization of the encoder.</p>
+<p>To initialize the encoder, you must provide the list of the classes that
+each curve will represent, in the same order along with information
+about the curves and the precision of the segmentation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>classes (list):</dt><dd><p>The list of class that each curves will represent
+It is require for the function parse.</p>
+</dd>
+<dt>temporal_precision (int):</dt><dd><p>The temporal prediction for each classes.</p>
+</dd>
+<dt>clip_length (int):</dt><dd><p>The length of the audio file (in seconds).</p>
+</dd>
+<dt>minimal_segment_step (int):</dt><dd><p>The minimum space in between two segments.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Encoder.Encoder.__module__">
+<code class="sig-name descname">__module__</code><em class="property"> = 'Encoder'</em><a class="headerlink" href="#Encoder.Encoder.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Encoder.Encoder.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#Encoder.Encoder.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder._encode_using_derivative">
+<code class="sig-name descname">_encode_using_derivative</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">rising: float = 0.5</em>, <em class="sig-param">decreasing: float = -0.5</em>, <em class="sig-param">window_size: int = 5</em>, <em class="sig-param">high: float = 0.8</em>, <em class="sig-param">padding: str = 'same'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="reference internal" href="_modules/Encoder.html#Encoder._encode_using_derivative"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Encoder.Encoder._encode_using_derivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>The derivative create segment based on the intensity of the variation of the temporal prediction curve.         If the prediction rise above a certain threshold <cite>rising</cite> then a valid segment start. If it decrease faster         than the <cite>decreasing</cite> threshold, then a valid segment finish. If the prediction start with a high value,         of rise slowly but high, then an absolute (and global) threshold <cite>high</cite> is used. (it works like a normal         threhsold).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a                 three dimensional numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;).
+rising (float): Must be between 0 and 1, rising threshold. When the decreasing (float): Must be between 0                 and 1, decreasing threshold.
+window_size (int): size of the processing window.
+high (float): minimum prediction value that trigger a valid.
+padding (str): The padding method to used on the curves.</p>
+</dd>
+<dt>Returns:</dt><dd><p>The result of the system under the form of a strong annotation text where each represent on timed event.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder.encode">
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">temporal_prediction: numpy.array</em>, <em class="sig-param">method: str = 'threshold'</em>, <em class="sig-param">smooth: str = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; list<a class="reference internal" href="_modules/Encoder.html#Encoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Encoder.Encoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the localization of the sound event present in the file.</p>
+<p>Using the temporal prediction provided y the last step of the system,
+it will “localize” the sound event inside the file under the form of a
+strongly annotated line. (see DCASE2018 task 4 strong label exemple).
+There is two methods implemented here, one using a simple threshold
+based segmentation and an other using a modulation system based on the
+variance of the prediction over the time.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>temporal_prediction (np.array): The complete set for</dt><dd><p>probabilities that need to segmented. must be a three dimensional
+numpy array (&lt;sample&gt;, &lt;class&gt;, &lt;frames&gt;)</p>
+</dd>
+<dt>method (str):</dt><dd><p>The segmentation method to use
+[threshold | hysteresis | derivative | primitive |
+mean_threshold | global_mean_threshold | median_threshold |
+gobal_median_threshold].</p>
+</dd>
+<dt>smooth (str):</dt><dd><p>The smoothing method to use [smoothMovingAvg].</p>
+</dd>
+<dt>kwargs:</dt><dd><p>See the segmentation method parameters.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Return a list of positive and negative segments with their size. A
+segment is a tuple where the first value that represent the segment
+value (1) for positive, (0) for negative and the second values is
+the width of the segment (number of frame).</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Exemple</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">`YOTsn73eqbfc_10.000_20.000.wav</span>&#160; <span class="pre">0.163</span>&#160;&#160; <span class="pre">0.665</span>&#160;&#160; <span class="pre">Alarm_bell_ringing`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Encoder.Encoder.parse">
+<code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param">all_segments: list</em>, <em class="sig-param">test_files_name: list</em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/Encoder.html#Encoder.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Encoder.Encoder.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a list of segment into a string ready for evaluation with
+sed_eval.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>all_segments (list): a list of dict of 10 key. the list length is equal to the number of file, the dict                 number test_files_name.
+(list): The list of the file names in the same.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Leo Cances
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
