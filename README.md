@@ -4,7 +4,7 @@ A python package for Sound Event Detection post-processing and optimization
 
 Documentation
 -------------
-See https://sedtools.github.io/ for a complete reference manual and introductory tutorials.
+See http://sedtools.github.io/ for a complete reference manual and introductory tutorials.
 
 
 Demonstration notebooks
