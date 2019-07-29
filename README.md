@@ -18,5 +18,5 @@ Installation
 sed_tools is currently under development and is available on test PyPI. You can install it by running
 
 ```
-pip install -i https://test.pypi.org/simple/ sed_tools
+pip install -i https://test.pypi.org/simple/ segtools
 ```
