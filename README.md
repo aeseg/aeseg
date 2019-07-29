@@ -4,7 +4,7 @@ A python package for Sound Event Detection post-processing and optimization
 
 Documentation
 -------------
-See http://segtools.github.io/ for a complete reference manual and introductory tutorials.
+See http://aeseg.github.io/ for a complete reference manual and introductory tutorials.
 
 
 Demonstration notebooks
@@ -18,5 +18,5 @@ Installation
 sed_tools is currently under development and is available on test PyPI. You can install it by running
 
 ```
-pip install -i https://test.pypi.org/simple/ segtools
+pip install -i https://test.pypi.org/simple/ aeseg
 ```
