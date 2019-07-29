@@ -15,8 +15,8 @@ What does sed_tools do?  Here are some quick demonstrations:
 Installation
 ------------
 
-The latest stable release is available on PyPI, and you can install it by saying
+sed_tools is currently under development and is available on test PyPI. You can install it by running
 
 ```
-pip install sed_tools
+pip install -i https://test.pypi.org/simple/ sed_tools
 ```
