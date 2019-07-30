@@ -12,12 +12,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../sed_tool'))
+sys.path.insert(0, os.path.abspath('../../sed_tools'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'sed_tools'
+project = 'aeseg'
 copyright = '2019, Leo Cances'
 author = 'Leo Cances'
 
@@ -44,6 +44,17 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+html_theme_options = {
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

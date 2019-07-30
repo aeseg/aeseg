@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Encoder &mdash; sed_tools  documentation</title>
+  <title>Encoder &mdash; aeseg  documentation</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -48,7 +49,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> sed_tools
+            <a href="../index.html" class="icon icon-home"> aeseg
           
 
           
@@ -78,8 +79,18 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../statistics.html">Statistics based methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parametrics.html">Parametrics methods</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../optimization.html">Tagging optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../optimization.html#segmentation-optimization">Segmentation optimization</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../source.html">Source</a></li>
+</ul>
+
             
           
         </div>
@@ -92,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">sed_tools</a>
+          <a href="../index.html">aeseg</a>
         
       </nav>
 
@@ -146,7 +157,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../index.html#Encoder.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">:</span>
+<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../Encoder.html#Encoder.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Allow the localization in time of sound events using temporal prediction.</span>
 
 <span class="sd">    In a sound event detection task, the output of the prediction model is</span>
@@ -156,7 +167,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Encoder.__init__"><a class="viewcode-back" href="../index.html#Encoder.Encoder.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">temporal_precision</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">clip_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<div class="viewcode-block" id="Encoder.__init__"><a class="viewcode-back" href="../Encoder.html#Encoder.Encoder.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">temporal_precision</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">clip_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                  <span class="n">minimal_segment_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">t_collar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.200</span><span class="p">,</span>
                  <span class="n">percentage_of_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
                  <span class="n">time_resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.00</span><span class="p">,</span>
@@ -195,7 +206,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">class_correspondence</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">class_correspondence_reverse</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)),</span> <span class="n">classes</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Encoder.encode"><a class="viewcode-back" href="../index.html#Encoder.Encoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;threshold&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="Encoder.encode"><a class="viewcode-back" href="../Encoder.html#Encoder.Encoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;threshold&quot;</span><span class="p">,</span>
                <span class="n">smooth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Perform the localization of the sound event present in the file.</span>
 
@@ -272,7 +283,7 @@
         <span class="c1"># Execute the selected segmentation algorithm and recover its results</span>
         <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="n">temporal_prediction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Encoder.parse"><a class="viewcode-back" href="../index.html#Encoder.Encoder.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_segments</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">test_files_name</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="Encoder.parse"><a class="viewcode-back" href="../Encoder.html#Encoder.Encoder.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_segments</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">test_files_name</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Transform a list of segment into a string ready for evaluation with</span>
 <span class="sd">        sed_eval.</span>
 
@@ -314,7 +325,7 @@
     <span class="c1">#       ENCODING METHODS</span>
     <span class="c1">#</span>
     <span class="c1"># ==================================================================================================================</span>
-<div class="viewcode-block" id="Encoder._encode_using_derivative"><a class="viewcode-back" href="../index.html#Encoder.Encoder._encode_using_derivative">[docs]</a>    <span class="k">def</span> <span class="nf">_encode_using_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+<div class="viewcode-block" id="Encoder._encode_using_derivative"><a class="viewcode-back" href="../Encoder.html#Encoder.Encoder._encode_using_derivative">[docs]</a>    <span class="k">def</span> <span class="nf">_encode_using_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporal_prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                                  <span class="n">rising</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">decreasing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>
                                  <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
                                  <span class="n">padding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;same&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>

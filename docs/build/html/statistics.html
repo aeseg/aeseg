@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Statistics based methods &mdash; aeseg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Parametrics methods" href="parametrics.html" />
+    <link rel="prev" title="Post processing methods" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> aeseg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Statistics based methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#average">Average</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#class-independent-data-wise-average">Class-independent data-wise average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-independent-file-wise-average">Class-independent file-wise average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-dependent-data-wise-average">Class-dependent data-wise average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-dependent-file-wise-average">Class-dependent file-wise average</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#median">Median</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#class-dependent-data-wise-median">Class-dependent data-wise median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-dependent-file-wise-median">Class-dependent file-wise median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-independent-data-wise-median">Class-independent data-wise median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-independent-file-wise-median">Class-independent file-wise median</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parametrics.html">Parametrics methods</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Tagging optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html#segmentation-optimization">Segmentation optimization</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Source</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">aeseg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Statistics based methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/statistics.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="statistics-based-methods">
+<h1>Statistics based methods<a class="headerlink" href="#statistics-based-methods" title="Permalink to this headline">¶</a></h1>
+<p>The statistics-based methods are directly based on the statistics extracted from the temporal predictions
+of each sample. The main advantage of these methods is that they are fast and often efficient.</p>
+<div class="section" id="average">
+<h2>Average<a class="headerlink" href="#average" title="Permalink to this headline">¶</a></h2>
+<p>By directly using the system temporal predictions, the mean is computed and used as a segmentation threshold.
+Depending on the methods used, the calculation of the average can be done either at the file or dataset level.
+Moreover, it can also be independent or dependent on the class.</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(S\)</span> represent the dataset</p></li>
+<li><p><span class="math notranslate nohighlight">\(p(x)\)</span> the temporal prediction output by the system</p></li>
+<li><p><span class="math notranslate nohighlight">\(N\)</span> the number of file in the dataset.</p></li>
+</ul>
+<div class="section" id="class-independent-data-wise-average">
+<h3>Class-independent data-wise average<a class="headerlink" href="#class-independent-data-wise-average" title="Permalink to this headline">¶</a></h3>
+<p>The average is computed using the temporal prediction from the whole dataset and the classes.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, Th=\frac{1}{N}\sum p(x)\]</div>
+</div>
+<div class="section" id="class-independent-file-wise-average">
+<h3>Class-independent file-wise average<a class="headerlink" href="#class-independent-file-wise-average" title="Permalink to this headline">¶</a></h3>
+<p><span class="math notranslate nohighlight">\(n\)</span> is the size of the prediction from one file. It depends on the precision of the system.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, Th_x= \frac{1}{n} \sum p(x)\]</div>
+</div>
+<div class="section" id="class-dependent-data-wise-average">
+<h3>Class-dependent data-wise average<a class="headerlink" href="#class-dependent-data-wise-average" title="Permalink to this headline">¶</a></h3>
+<p><span class="math notranslate nohighlight">\(c\)</span> represent the class and <span class="math notranslate nohighlight">\(C\)</span> the ensemble of class the system can target.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, \forall c \in C, Th_c = \frac{1}{N} \sum p_c(x)\]</div>
+</div>
+<div class="section" id="class-dependent-file-wise-average">
+<h3>Class-dependent file-wise average<a class="headerlink" href="#class-dependent-file-wise-average" title="Permalink to this headline">¶</a></h3>
+<p><span class="math notranslate nohighlight">\(c\)</span> represent the class and <span class="math notranslate nohighlight">\(C\)</span> the ensemble of class the system can target.</p>
+<p><span class="math notranslate nohighlight">\(n\)</span> is the size of the prediction from one file. It depends on the precision of the system.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, \forall c \in C, Th_{xc} = \frac{1}{n} \sum p_c(x)\]</div>
+</div>
+</div>
+<div class="section" id="median">
+<h2>Median<a class="headerlink" href="#median" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The documentation here need to be change from here. Is it really necessary to write down the detail of the calculation of the median ?</p>
+</div>
+<p>By directly using the system temporal predictions, the median is computed and used as a segmentation threshold.
+Depending on the methods used, the calculation of the average can be done either at the file or dataset level.
+Moreover, it can also be independent or dependent on the class.</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(S\)</span> represent the dataset</p></li>
+<li><p><span class="math notranslate nohighlight">\(p(x)\)</span> the temporal prediction output by the system</p></li>
+<li><p><span class="math notranslate nohighlight">\(N\)</span> the number of file in the dataset.</p></li>
+</ul>
+<div class="section" id="class-dependent-data-wise-median">
+<h3>Class-dependent data-wise median<a class="headerlink" href="#class-dependent-data-wise-median" title="Permalink to this headline">¶</a></h3>
+<p>The average is computed using the temporal prediction from the whole dataset and the classes.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, Th=\frac{1}{N}\sum p(x)\]</div>
+</div>
+<div class="section" id="class-dependent-file-wise-median">
+<h3>Class-dependent file-wise median<a class="headerlink" href="#class-dependent-file-wise-median" title="Permalink to this headline">¶</a></h3>
+<p><span class="math notranslate nohighlight">\(n\)</span> is the size of the prediction from one file. It depends on the precision of the system.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, Th_x= \frac{1}{n} \sum p(x)\]</div>
+</div>
+<div class="section" id="class-independent-data-wise-median">
+<h3>Class-independent data-wise median<a class="headerlink" href="#class-independent-data-wise-median" title="Permalink to this headline">¶</a></h3>
+<p><span class="math notranslate nohighlight">\(c\)</span> represent the class and <span class="math notranslate nohighlight">\(C\)</span> the ensemble of class the system can target.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, \forall c \in C, Th_c = \frac{1}{N} \sum p_c(x)\]</div>
+</div>
+<div class="section" id="class-independent-file-wise-median">
+<h3>Class-independent file-wise median<a class="headerlink" href="#class-independent-file-wise-median" title="Permalink to this headline">¶</a></h3>
+<p><span class="math notranslate nohighlight">\(c\)</span> represent the class and <span class="math notranslate nohighlight">\(C\)</span> the ensemble of class the system can target.</p>
+<p><span class="math notranslate nohighlight">\(n\)</span> is the size of the prediction from one file. It depends on the precision of the system.</p>
+<div class="math notranslate nohighlight">
+\[\forall x \in S, \forall c \in C, Th_{xc} = \frac{1}{n} \sum p_c(x)\]</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="parametrics.html" class="btn btn-neutral float-right" title="Parametrics methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Post processing methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Leo Cances
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

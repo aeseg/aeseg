@@ -1,7 +1,0 @@
-sed_tool
-========
-
-.. toctree::
-   :maxdepth: 4
-
-   sed_tool
