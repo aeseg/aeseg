@@ -7,8 +7,8 @@ from multiprocessing import Pool
 import numpy as np
 import tqdm
 
-from sed_tool.Encoder import Encoder
-from sed_tool.sed_tools import sb_evaluator, eb_evaluator
+from Encoder import Encoder
+from sed_tools import sb_evaluator, eb_evaluator
 
 
 def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
@@ -31,7 +31,7 @@ def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
     #    combination = [combination]
 
     combination = dict(
-        zip( keys, combination )
+        zip(keys, combination)
     )
 
     # Compute segment and transform into a csv string
