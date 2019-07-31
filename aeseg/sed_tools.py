@@ -275,7 +275,7 @@ def list_string_to_mdc(event_list: list) -> dcu.containers.MetaDataContainer:
 
 if __name__=='__main__':
     import numpy as np
-    from sed_tools.Encoder import Encoder
+    from aeseg.Encoder import Encoder
 
     # load baseline data
     strong_prediction_path = "/home/lcances/sync/Documents_sync/Projet" \

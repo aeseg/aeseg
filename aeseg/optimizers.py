@@ -8,7 +8,7 @@ import numpy as np
 import tqdm
 
 from Encoder import Encoder
-from sed_tools import sb_evaluator, eb_evaluator
+from aeseg import sb_evaluator, eb_evaluator
 
 
 def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
