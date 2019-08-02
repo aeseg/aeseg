@@ -44,7 +44,9 @@ exclude_patterns = []
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
+extensions += ["sphinx_rtd_theme"]
+
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     'display_version': True,
@@ -71,3 +73,4 @@ def skip(app, what, name, obj, would_skip, options):
 
 def setup(app):
     app.connect("autodoc-skip-member", skip)
+    app.add_stylesheet("my_style.css")

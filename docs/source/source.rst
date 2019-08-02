@@ -1,6 +1,7 @@
 Source
 ======
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   Encoder
+    Encoder
+    optimizers

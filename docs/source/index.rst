@@ -11,6 +11,9 @@ segmentation of audio event. I initially developed it for the `DCASE 2018 task f
 It is typically used for the post-processing step of a Sound Event Detection system that output
 temporal probabilities that need to be cut into positive and negative segment.
 
+.. warning::
+   This documentation is currently being writing. Some information are missing and others to be re-written
+
 Post processing methods
 =======================
 
