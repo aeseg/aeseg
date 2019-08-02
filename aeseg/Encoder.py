@@ -34,6 +34,7 @@ class Encoder:
                 The minimum space in between two segments.
 
         :Exemple:
+
         ::
 
             class_list = ['Alarm_bell_ringing', 'Speech', 'Dog', 'Cat', 'Vacuum_cleaner', 'Dishes', 'Frying', 'Electric_shaver_toothbrush', 'Blender', 'Running_water']
@@ -87,18 +88,13 @@ class Encoder:
             segment is a tuple where the first value that represent the segment
             value (1) for positive, (0) for negative and the second values is
             the width of the segment (number of frame).
-
-        :Exemple:
-        ```YOTsn73eqbfc_10.000_20.000.wav  0.163   0.665   Alarm_bell_ringing```
         """
         # parameters verification
-        _methods = ["threshold", "hysteresis", "derivative", "mean_threshold",
-                    "median_threshold", "dynamic_threshold",
+        _methods = ["threshold", "hysteresis", "derivative", "mean_threshold", "median_threshold", "dynamic_threshold",
                     "global_mean_threshold", "global_median_threshold"]
 
         if method not in _methods:
-            raise ValueError("Method %s doesn't exist. Only %s are available" %
-                             (method, _methods))
+            raise ValueError("Method %s doesn't exist. Only %s are available" % (method, _methods))
 
         # Depending on the method selected, the proper function will be selected
         encoder = None
@@ -134,13 +130,12 @@ class Encoder:
         return encoder(temporal_prediction, **kwargs)
 
     def parse(self, all_segments: list, test_files_name: list) -> str:
-        """ Transform a list of segment into a string ready for evaluation with
-        sed_eval.
+        """ Transform a list of segment into a string ready for evaluation with sed_eval.
 
         Args:
             all_segments (list): a list of dict of 10 key. the list length is equal to the number of file, the dict \
                 number test_files_name.
-            (list): The list of the file names in the same.
+            test_files_name(list): The list of the file names in the same.
         """
         output = ""
 
@@ -175,27 +170,235 @@ class Encoder:
     #       ENCODING METHODS
     #
     # ==================================================================================================================
-    def _encode_using_derivative(self, temporal_prediction: np.array,
-                                 rising: float = 0.5, decreasing: float = -0.5,
-                                 window_size: int = 5, high: float = 0.8,
-                                 padding: str = "same", **kwargs) -> list:
-        """ The derivative create segment based on the intensity of the variation of the temporal prediction curve. \
-        If the prediction rise above a certain threshold `rising` then a valid segment start. If it decrease faster \
-        than the `decreasing` threshold, then a valid segment finish. If the prediction start with a high value, \
-        of rise slowly but high, then an absolute (and global) threshold `high` is used. (it works like a normal \
+    def _encode_using_threshold(self, temporal_prediction: np.array, threshold: float or list, **kwargs) -> list:
+        """A basic threshold segmentation algorithm.
+
+        For each frame where the probability is above the given threshold, will be part of a valid segment, \
+        an invalid one otherwise. The threshold can be set globally (one unique threshold for all the \
+        classes) or independently (one threshold for each classes)
+
+        Args:
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy array
+                (<sample>, <class>, <frames>)
+            threshold (float or list):
+                One unique threshold or a list of threhsold. If using a list, it must define one threshold for
+                each class.
+            kwargs:
+                kwargs ...
+
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="threshold",
+                threshold=0.5,
+               **smoothing_parameters  # (optional)
+            )
+        """
+        output = []
+
+        # Treshold can be either an int or an Iterable (list, np.Array, tuple, etc ...)
+        # If int, transform it to a list
+        thresholds = threshold
+        if not isinstance(threshold, Iterable):
+            thresholds = [threshold] * len(self.classes)
+
+        bin_prediction = temporal_prediction.copy()
+        bin_prediction[bin_prediction > thresholds] = 1
+        bin_prediction[bin_prediction <= thresholds] = 0
+
+        # Merging "hole" that are smaller than 200 ms
+        step_length = self.clip_length / temporal_prediction.shape[1] * 1000
+        max_hole_size = int(self.minimal_segment_step / step_length)
+
+        for clip in bin_prediction:
+            labeled = dict()
+
+            cls = 0
+            for bin_prediction_per_class in clip.T:
+                # convert the binarized list into a list of tuple representing
+                # the element and it's number of occurrence. The order is
+                # conserved and the total sum should be equal to 10s
+
+                # first pass --> Fill the holes
+                for i in range(len(bin_prediction_per_class) - max_hole_size):
+                    window = bin_prediction_per_class[i: i + max_hole_size]
+
+                    if window[0] == window[-1] == 1:
+                        window[:] = [window[0]] * max_hole_size
+
+                # second pass --> split into segments
+                converted = []
+                cpt = 0
+                nb_segment = 0
+                previous_elt = None
+                for element in bin_prediction_per_class:
+                    if previous_elt is None:
+                        previous_elt = element
+                        cpt += 1
+                        nb_segment = 1
+                        continue
+
+                    if element == previous_elt:
+                        cpt += 1
+
+                    else:
+                        converted.append((previous_elt, cpt))
+                        previous_elt = element
+                        nb_segment += 1
+                        cpt = 1
+
+                # case where the class is detect during the whole clip
+                #                 if nbSegment == 1:
+                converted.append((previous_elt, cpt))
+
+                labeled[cls] = converted.copy()
+                cls += 1
+
+            output.append(labeled)
+
+        return output
+
+    def _encode_using_hysteresis(self, temporal_prediction: np.array, low: float = 0.4, high: float = 0.6, **kwargs) -> list:
+        """ Hysteresis threshold segmentation method.
+
+        The hysteresis based segmentation algorithm require two thresholds. A high value to decided when the
+        segment should start and a low value to decided when to finish the segment. It perform better when the temporal
+        prediction is noisy.
+
+        Args:
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy
+                array (<sample>, <class>, <frames>).
+            low (float):
+                low threshold (can be a list for class-dependant thresholding)
+            high (float):
+                high threshold (can ve a list for class-dependant thresholding)
+            kwargs:
+                Extra arguments
+
+        Returns:
+            the result of the system under the form of a strong annotation text where each line represent on timed event.
+
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="hysteresis",
+                low=0.4,
+                high=0.6
+               **smoothing_parameters  # (optional)
+            )
+
+        """
+
+        # In case of class dependant thresholding
+        lows = low
+        if not isinstance(low, Iterable):
+            lows = [low] * len(self.classes)
+
+        highs = high
+        if not isinstance(high, Iterable):
+            highs = [high] * len(self.classes)
+
+        prediction = temporal_prediction
+
+        output = []
+
+        for clip in prediction:
+            labeled = dict()
+
+            cls = 0
+            for cls_ind, prediction_per_class in enumerate(clip.T):
+                converted = list()
+                segment = [0, 0]
+                nb_segment = 1
+                for i in range(len(prediction_per_class)):
+                    element = prediction_per_class[i]
+
+                    # first element
+                    if i == 0:
+                        if element > highs[cls_ind]:
+                            segment = [1.0, 1]
+                        else:
+                            segment = [0.0, 1]
+
+                    # then
+                    if element > highs[cls_ind]:
+                        if segment[0] == 1:
+                            segment[1] += 1
+                        else:
+                            converted.append(segment)
+                            nb_segment += 1
+                            segment = [1.0, 1]
+
+                    elif lows[cls_ind] <= element:
+                        segment[1] += 1
+
+                    else:
+                        if segment[0] == 0:
+                            segment[1] += 1
+                        else:
+                            converted.append(segment)
+                            nb_segment += 1
+                            segment = [0.0, 0]
+
+                converted.append(segment)
+
+                labeled[cls] = converted.copy()
+                cls += 1
+
+            output.append(labeled)
+
+        return output
+
+    def _encode_using_derivative(self, temporal_prediction: np.array, rising: float = 0.5, decreasing: float = -0.5,
+                                 window_size: int = 5, high: float = 0.8, padding: str = "same", **kwargs) -> list:
+        """ Slope based segmentation.
+
+        The derivative create segment based on the intensity of the variation of the temporal prediction curve.
+        If the prediction rise above a certain threshold `rising` then a valid segment start. If it decrease faster
+        than the `decreasing` threshold, then a valid segment finish. If the prediction start with a high value,
+        of rise slowly but high, then an absolute (and global) threshold `high` is used. (it works like a normal
         threhsold).
 
         Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \
-                three dimensional numpy array (<sample>, <class>, <frames>).
-            rising (float): Must be between 0 and 1, rising threshold. When the decreasing (float): Must be between 0 \
-                and 1, decreasing threshold.
-            window_size (int): size of the processing window.
-            high (float): minimum prediction value that trigger a valid.
-            padding (str): The padding method to used on the curves.
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy
+                array (<sample>, <class>, <frames>).
+            rising (float):
+                Must be between 0 and 1, rising threshold. When the decreasing (float): Must be between 0 and 1,
+                decreasing threshold.
+            window_size (int):
+                size of the processing window.
+            high (float):
+                minimum prediction value that trigger a valid.
+            padding (str):
+                The padding method to used on the curves.
 
         Returns:
             The result of the system under the form of a strong annotation text where each represent on timed event.
+
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="derivative",
+                rising=0.5,
+                decreasing=-0.5,
+                window_size=5,
+                high=0.9
+                padding="same",
+                **smoothing_parameters  # (optional)
+            )
+
         """
 
         output = []
@@ -288,171 +491,37 @@ class Encoder:
             output.append(labeled)
         return output
 
-    def _encode_using_hysteresis(self, temporal_prediction: np.array,
-                                 low: float = 0.4, high: float = 0.6,
-                                 **kwargs) -> list:
-        """ The hysteresis based segmentation algorithm require two thresholds. A high value to decided when the \
-        segment should start and a low value to decided when to finish the segment. It perform better when the temporal \
-        prediction is noisy.
-
-        Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \
-                three dimensional numpy array (<sample>, <class>, <frames>).
-            low (float): low threshold (can be a list for class-dependant thresholding)
-            high (float): high threshold (can ve a list for class-dependant thresholding)
-            kwargs: Extra arguments
-
-        Returns:
-            the result of the system under the form of a strong annotation text where each line represent on timed event.
-        """
-
-        # In case of class dependant thresholding
-        lows = low
-        if not isinstance(low, Iterable):
-            lows = [low] * len(self.classes)
-
-        highs = high
-        if not isinstance(high, Iterable):
-            highs = [high] * len(self.classes)
-
-        prediction = temporal_prediction
-
-        output = []
-
-        for clip in prediction:
-            labeled = dict()
-
-            cls = 0
-            for cls_ind, prediction_per_class in enumerate(clip.T):
-                converted = list()
-                segment = [0, 0]
-                nb_segment = 1
-                for i in range(len(prediction_per_class)):
-                    element = prediction_per_class[i]
-
-                    # first element
-                    if i == 0:
-                        if element > highs[cls_ind]:
-                            segment = [1.0, 1]
-                        else:
-                            segment = [0.0, 1]
-
-                    # then
-                    if element > highs[cls_ind]:
-                        if segment[0] == 1:
-                            segment[1] += 1
-                        else:
-                            converted.append(segment)
-                            nb_segment += 1
-                            segment = [1.0, 1]
-
-                    elif lows[cls_ind] <= element:
-                        segment[1] += 1
-
-                    else:
-                        if segment[0] == 0:
-                            segment[1] += 1
-                        else:
-                            converted.append(segment)
-                            nb_segment += 1
-                            segment = [0.0, 0]
-
-                converted.append(segment)
-
-                labeled[cls] = converted.copy()
-                cls += 1
-
-            output.append(labeled)
-
-        return output
-
-    def _encode_using_threshold(self, temporal_prediction: np.array,
-                                threshold: float or list, **kwargs) -> list:
-        """A basic threshold segmentation algorithm.
-
-        For each frame where the probability is above the given threshold, will be part of a valid segment, \
-        an invalid one otherwise. The threshold can be set globally (one unique threshold for all the \
-        classes) or independantely (one threshold for each classes)
-
-        Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \
-                three dimensional numpy array (<sample>, <class>, <frames>)
-            threshold (float or list): One unique threshold or a list of threhsold. If using a list, it must define \
-                one threshold for each class.
-            kwargs:
-        """
-        output = []
-
-        thresholds = threshold
-        if not isinstance(threshold, Iterable):
-            thresholds = [threshold] * len(self.classes)
-
-        bin_prediction = temporal_prediction.copy()
-        bin_prediction[bin_prediction > thresholds] = 1
-        bin_prediction[bin_prediction <= thresholds] = 0
-
-        # Merging "hole" that are smaller than 200 ms
-        step_length = self.clip_length / temporal_prediction.shape[1] * 1000
-        max_hole_size = int(self.minimal_segment_step / step_length)
-
-        for clip in bin_prediction:
-            labeled = dict()
-
-            cls = 0
-            for bin_prediction_per_class in clip.T:
-                # convert the binarized list into a list of tuple representing
-                # the element and it's number of occurrence. The order is
-                # conserved and the total sum should be equal to 10s
-
-                # first pass --> Fill the holes
-                for i in range(len(bin_prediction_per_class) - max_hole_size):
-                    window = bin_prediction_per_class[i: i + max_hole_size]
-
-                    if window[0] == window[-1] == 1:
-                        window[:] = [window[0]] * max_hole_size
-
-                # second pass --> split into segments
-                converted = []
-                cpt = 0
-                nb_segment = 0
-                previous_elt = None
-                for element in bin_prediction_per_class:
-                    if previous_elt is None:
-                        previous_elt = element
-                        cpt += 1
-                        nb_segment = 1
-                        continue
-
-                    if element == previous_elt:
-                        cpt += 1
-
-                    else:
-                        converted.append((previous_elt, cpt))
-                        previous_elt = element
-                        nb_segment += 1
-                        cpt = 1
-
-                # case where the class is detect during the whole clip
-                #                 if nbSegment == 1:
-                converted.append((previous_elt, cpt))
-
-                labeled[cls] = converted.copy()
-                cls += 1
-
-            output.append(labeled)
-
-        return output
-
     def _encode_using_gmean_threshold(self, temporal_prediction: np.array,
                                       independent: bool = False, **kwargs
                                       ) -> list:
-        """ Using all the temporal prediction, the mean of each curve and for each class is computed and will \
-         be choose as threshold. Then call the `__encode_using_threshold` function to apply it.
+        """ Absolute threshold computed using the average prediction of the whole dataset.
+
+        Using all the temporal prediction, the mean of each curve and for each class is computed and will be choose
+        as threshold. Then call the `__encode_using_threshold` function to apply it. The average is calculated
+        independently for each class. Two return mode exist, one that return the average of class's threshold, giving
+        an unique threshold for all the class, one that the return the list of threshold, giving a different threshold
+        that depend on the class.
 
         Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \
-                three dimensional numpy array (<sample>, <class>, <frames>)
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy
+                array (<sample>, <class>, <frames>)
+            independent (bool):
+                If True, return a list of threshold, one different for each class.
+                If False, return an unique threshold
             kwargs:
+                kwargs ...
+
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="global_mean_threshold",
+                **smoothing_parameters  # (optional)
+            )
+
         """
 
         total_thresholds = []
@@ -476,13 +545,34 @@ class Encoder:
     def _encode_using_gmedian_threshold(self, temporal_prediction: np.array,
                                         independent: bool = False, **kwargs
                                         ) -> list:
-        """ Using all the temporal prediction, the mean of each curve and for each class is compted and will be \
-        choose as threshold. Then call the `__encoder_using_threshold` function to apply it.
+        """ Absolute threshold computed using the median prediction of the whole dataset.
+
+        Using all the temporal prediction, the median of each curve and for each class is selected and will be choose
+        as threshold. Then call the `__encode_using_threshold` function to apply it. The median is retrieve
+        independently for each class. Two return mode exist, one that return the average of class's threshold, giving
+        an unique threshold for all the class, one that the return the list of threshold, giving a different threshold
+        that depend on the class.
 
         Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \
-                three dimensional numpy array (<sample>, <class>, <frames>)
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy
+                array (<sample>, <class>, <frames>)
+            independent (bool):
+                If True, return a list of threshold, one different for each class.
+                If False, return an unique threshold
             kwargs:
+                kwargs ...
+
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="global_median_threshold",
+                **smoothing_parameters  # (optional)
+            )
+
         """
 
         total_thresholds = []
@@ -504,18 +594,35 @@ class Encoder:
                 threshold=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def _encode_using_mean_threshold(self, temporal_prediction: np.array,
-                                     **kwargs) -> list:
-        """ This algorithm is similar to the global mean threshold but will compute new threshold(s) (global or \
-        independent) for each files.
+    def _encode_using_mean_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
+        """ Absolute threshold computed using the average prediction **independently** for each file in the dataset
+
+        Using all the temporal prediction from a specified file, the average of each curve is selected and chosen
+        as threshold. Then call the `__encode_using_threshold` function to apply it. The average is retrieve
+        independently for each class. Two return mode exist, one that return the average of class's threshold, giving
+        an unique threshold for all the class, one that the return the list of threshold, giving a different threshold
+        that depend on the class.
 
         Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. must be a \
-                three dimensional numpy array (<sample>, <class>, <frames>)
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy
+                array (<sample>, <class>, <frames>)
+            independent (bool):
+                If True, return a list of threshold, one different for each class.
+                If False, return an unique threshold
             kwargs:
+                kwargs ...
 
-        Returns:
-            the result of the system under the form of a strong annotation text where each line represent on timed event.
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="mean_threshold",
+                **smoothing_parameters  # (optional)
+            )
+
         """
 
         # Recover the kwargs arguments
@@ -588,6 +695,35 @@ class Encoder:
         return output
 
     def _encode_using_median_treshold(self, temporal_prediction: np.array, **kwargs) -> list:
+        """ Absolute threshold computed using the median prediction **independently** for each file in the dataset
+
+        Using all the temporal prediction from a specified file, the median of each curve is selected and chosen
+        as threshold. Then call the `__encode_using_threshold` function to apply it. The median is retrieve
+        independently for each class. Two return mode exist, one that return the average of class's threshold, giving
+        an unique threshold for all the class, one that the return the list of threshold, giving a different threshold
+        that depend on the class.
+
+        Args:
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy
+                array (<sample>, <class>, <frames>)
+            independent (bool):
+                If True, return a list of threshold, one different for each class.
+                If False, return an unique threshold
+            kwargs:
+                kwargs ...
+
+        :Exemple:
+
+        ::
+
+            segments = encoder.encode(
+                val_strong_pred,
+                method="median_threshold",
+                **smoothing_parameters  # (optional)
+            )
+
+        """
         """ This algorithm is similar to the global median threshold but will compute new threshold(s) (global or \
         independent) for each files.
 
@@ -670,13 +806,6 @@ class Encoder:
         return output
 
     def _encode_using_dynamic_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
-        """ exemple documentation.
-
-        Args:
-            temporal_prediction (np.array): The complete set for probabilities that need to segmented. \
-                must be a three dimensional numpy array (<sample>, <class>, <frames>)
-            kwargs: test
-        """
         raise NotImplementedError()
 
     # ==========================================================================
@@ -689,9 +818,13 @@ class Encoder:
         """Pad and array using the methods given and a window_size.
 
         Args:
-            array (np.array): the array to pad
-            window_size (int): the size of the working window
-            method (str): methods of padding, two available "same" | "reflect"
+            array (np.array):
+                The array to pad
+            window_size (int):
+                The size of the working window
+            method (str):
+                Methods of padding, to be chosen from the following list
+                ``` ["same", "valid", "zero"] ```
 
         Returns:
             the padded array
@@ -709,7 +842,7 @@ class Encoder:
         elif method == "valid":
             output = array
 
-        elif method == "null":
+        elif method == "zero":
             missing = int(window_size / 2)
             start, end = [0] * missing, [0] * missing
 
@@ -728,16 +861,13 @@ class Encoder:
         """ For smoothing the curve of the prediction curves.
 
         Args:
-            temporal_prediction (np.array): The temporalPrediction of the second model (TimeDistributed Dense output).
-            method (str): The algorithm to use for smoothing the curves.
-            kwargs: See argument list for the smoothing algorithm.
+            temporal_prediction (np.array):
+                The temporalPrediction of the second model (TimeDistributed Dense output).
+            method (str):
+                The algorithm to use for smoothing the curves. ["smoothMovingAvg", "smoothMovingMedian"]
+            kwargs:
+                See argument list for the smoothing algorithm.
         """
-        # TODO give possibility to make a class-dependant smooth method
-
-        # the method can be class dependant
-        #methods = method
-        #if not isinstance(method, Iterable):
-        #    methods = [method] * len(self.classes)
 
         # Check if methods asked exist
         _methods = ["smoothMovingAvg", "smoothMovingMedian"]
@@ -768,8 +898,7 @@ class Encoder:
     def _smooth_moving_avg(self, temporal_prediction: np.array,
                            window_len: int = 5, padding: str = "same",
                            **kwargs):
-        """ Apply the smooth moving average on all class. Can be
-        class-dependant or not.
+        """ Apply the smooth moving average on all class. Can be class-dependant or not.
 
         Args:
             temporal_prediction (np.array):
