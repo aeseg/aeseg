@@ -20,14 +20,12 @@ class Encoder:
                  method: str = "event_based_metrics"):
         """ Initialization of the encoder.
 
-        To initialize the encoder, you must provide the list of the classes that
-        each curve will represent, in the same order along with information
-        about the curves and the precision of the segmentation.
+        To initialize the encoder, you must provide the list of the classes that each curve will represent, \
+        in the same order along with information about the curves and the precision of the segmentation.
 
         Args:
             classes (list):
-                The list of class that each curves will represent
-                It is require for the function parse.
+                The list of class that each curves will represent It is require for the function parse.
             temporal_precision (int):
                 The temporal prediction for each classes.
             clip_length (int):
@@ -35,7 +33,18 @@ class Encoder:
             minimal_segment_step (int):
                 The minimum space in between two segments.
 
-        .. todo:: Implement alternative way to provide the data (dict)
+        :Exemple:
+        ::
+
+            class_list = ['Alarm_bell_ringing', 'Speech', 'Dog', 'Cat', 'Vacuum_cleaner', 'Dishes', 'Frying', 'Electric_shaver_toothbrush', 'Blender', 'Running_water']
+
+            # Create the encoder that will be used
+            encoder = Encoder(
+                classes=class_list,
+                temporal_precision = 200,  # ms
+                clip_length = 10,          # s
+                minimal_segment_step = 200 # ms
+            )
         """
         self.classes = classes
         self.temporal_precision = temporal_precision
@@ -56,22 +65,18 @@ class Encoder:
                smooth: str = None, **kwargs) -> list:
         """Perform the localization of the sound event present in the file.
 
-        Using the temporal prediction provided y the last step of the system,
-        it will "localize" the sound event inside the file under the form of a
-        strongly annotated line. (see DCASE2018 task 4 strong label exemple).
-        There is two methods implemented here, one using a simple threshold
-        based segmentation and an other using a modulation system based on the
-        variance of the prediction over the time.
+        Using the temporal prediction provided y the last step of the system, it will "localize" the sound event
+        inside the file under the form of a strongly annotated line. (see DCASE2018 task 4 strong label exemple).
+        There is two methods implemented here, one using a simple threshold based segmentation and an other using
+        a modulation system based on the variance of the prediction over the time.
 
         Args:
-            temporal_prediction (np.array): The complete set for
-                probabilities that need to segmented. must be a three dimensional
-                numpy array (<sample>, <class>, <frames>)
+            temporal_prediction (np.array):
+                The complete set for probabilities that need to segmented. must be a three dimensional numpy array
+                (<sample>, <class>, <frames>)
             method (str):
-                The segmentation method to use
-                [threshold | hysteresis | derivative | primitive |
-                mean_threshold | global_mean_threshold | median_threshold |
-                gobal_median_threshold].
+                The segmentation method to use [threshold | hysteresis | derivative | primitive |
+                mean_threshold | global_mean_threshold | median_threshold | gobal_median_threshold].
             smooth (str):
                 The smoothing method to use [smoothMovingAvg].
             kwargs:
@@ -84,7 +89,6 @@ class Encoder:
             the width of the segment (number of frame).
 
         :Exemple:
-
         ```YOTsn73eqbfc_10.000_20.000.wav  0.163   0.665   Alarm_bell_ringing```
         """
         # parameters verification
@@ -100,26 +104,26 @@ class Encoder:
         encoder = None
 
         if method == _methods[0]:
-            encoder = self.__encode_using_threshold
+            encoder = self._encode_using_threshold
         elif method == _methods[2]:
             encoder = self._encode_using_derivative
         elif method == _methods[1]:
-            encoder = self.__encode_using_hysteresis
+            encoder = self._encode_using_hysteresis
         elif method == _methods[3]:
-            encoder = self.__encode_using_mean_threshold
+            encoder = self._encode_using_mean_threshold
         elif method == _methods[6]:
-            encoder = self.__encode_using_gmean_threshold
+            encoder = self._encode_using_gmean_threshold
         elif method == _methods[4]:
-            encoder = self.__encode_using_median_treshold
+            encoder = self._encode_using_median_treshold
         elif method == _methods[5]:
-            encoder = self.__encode_using_dynamic_threshold
+            encoder = self._encode_using_dynamic_threshold
         elif method == _methods[7]:
-            encoder = self.__encode_using_gmedian_threshold
+            encoder = self._encode_using_gmedian_threshold
 
         # Apply smoothing if requested
         if smooth is not None:
-            temporal_prediction = self.__smooth(temporal_prediction,
-                                                method=smooth, **kwargs)
+            temporal_prediction = self._smooth(temporal_prediction,
+                                               method=smooth, **kwargs)
 
         # Now that we have the strong prediction, we can assign the value to the
         # two attributes nb_frame and frame_length
@@ -225,9 +229,9 @@ class Encoder:
                 _decreasing = decreasings[cls_ind]
                 _high = highs[cls_ind]
 
-                padded_prediction_per_class = self.__pad(prediction_per_class,
-                                                         _window_size,
-                                                         method=padding)
+                padded_prediction_per_class = self._pad(prediction_per_class,
+                                                        _window_size,
+                                                        method=padding)
 
                 nb_segment = 1
                 segments = []
@@ -284,9 +288,9 @@ class Encoder:
             output.append(labeled)
         return output
 
-    def __encode_using_hysteresis(self, temporal_prediction: np.array,
-                                  low: float = 0.4, high: float = 0.6,
-                                  **kwargs) -> list:
+    def _encode_using_hysteresis(self, temporal_prediction: np.array,
+                                 low: float = 0.4, high: float = 0.6,
+                                 **kwargs) -> list:
         """ The hysteresis based segmentation algorithm require two thresholds. A high value to decided when the \
         segment should start and a low value to decided when to finish the segment. It perform better when the temporal \
         prediction is noisy.
@@ -362,8 +366,8 @@ class Encoder:
 
         return output
 
-    def __encode_using_threshold(self, temporal_prediction: np.array,
-                                 threshold: float or list, **kwargs) -> list:
+    def _encode_using_threshold(self, temporal_prediction: np.array,
+                                threshold: float or list, **kwargs) -> list:
         """A basic threshold segmentation algorithm.
 
         For each frame where the probability is above the given threshold, will be part of a valid segment, \
@@ -439,9 +443,9 @@ class Encoder:
 
         return output
 
-    def __encode_using_gmean_threshold(self, temporal_prediction: np.array,
-                                       independent: bool = False, **kwargs
-                                       ) -> list:
+    def _encode_using_gmean_threshold(self, temporal_prediction: np.array,
+                                      independent: bool = False, **kwargs
+                                      ) -> list:
         """ Using all the temporal prediction, the mean of each curve and for each class is computed and will \
          be choose as threshold. Then call the `__encode_using_threshold` function to apply it.
 
@@ -459,19 +463,19 @@ class Encoder:
         total_thresholds = np.array(total_thresholds)
 
         if independent:
-            return self.__encode_using_threshold(
+            return self._encode_using_threshold(
                 temporal_prediction,
                 threshold=total_thresholds.mean(axis=0),
                 **kwargs)
         else:
-            return self.__encode_using_threshold(
+            return self._encode_using_threshold(
                 temporal_prediction,
                 threshold=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_gmedian_threshold(self, temporal_prediction: np.array,
-                                         independent: bool = False, **kwargs
-                                         ) -> list:
+    def _encode_using_gmedian_threshold(self, temporal_prediction: np.array,
+                                        independent: bool = False, **kwargs
+                                        ) -> list:
         """ Using all the temporal prediction, the mean of each curve and for each class is compted and will be \
         choose as threshold. Then call the `__encoder_using_threshold` function to apply it.
 
@@ -490,18 +494,18 @@ class Encoder:
         total_thresholds = np.array(total_thresholds)
 
         if independent:
-            return self.__encode_using_threshold(
+            return self._encode_using_threshold(
                 temporal_prediction,
                 threshold=total_thresholds.mean(axis=0),
                 **kwargs)
         else:
-            return self.__encode_using_threshold(
+            return self._encode_using_threshold(
                 temporal_prediction,
                 threshold=[total_thresholds.mean()] * len(self.classes),
                 **kwargs)
 
-    def __encode_using_mean_threshold(self, temporal_prediction: np.array,
-                                      **kwargs) -> list:
+    def _encode_using_mean_threshold(self, temporal_prediction: np.array,
+                                     **kwargs) -> list:
         """ This algorithm is similar to the global mean threshold but will compute new threshold(s) (global or \
         independent) for each files.
 
@@ -583,7 +587,7 @@ class Encoder:
 
         return output
 
-    def __encode_using_median_treshold(self, temporal_prediction: np.array, **kwargs) -> list:
+    def _encode_using_median_treshold(self, temporal_prediction: np.array, **kwargs) -> list:
         """ This algorithm is similar to the global median threshold but will compute new threshold(s) (global or \
         independent) for each files.
 
@@ -665,7 +669,7 @@ class Encoder:
 
         return output
 
-    def __encode_using_dynamic_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
+    def _encode_using_dynamic_threshold(self, temporal_prediction: np.array, **kwargs) -> list:
         """ exemple documentation.
 
         Args:
@@ -680,8 +684,8 @@ class Encoder:
     #       SMOOTHING AND UTILITIES
     #
     # ==========================================================================
-    def __pad(self, array: np.array, window_size: int,
-              method: str = "same") -> np.array:
+    def _pad(self, array: np.array, window_size: int,
+             method: str = "same") -> np.array:
         """Pad and array using the methods given and a window_size.
 
         Args:
@@ -718,9 +722,9 @@ class Encoder:
     #     SMOOTHING FUNCTIONS:
     #
     # ===============================================================================
-    def __smooth(self, temporal_prediction: np.array,
-                 method: str = "smoothMovingAvg",
-                 **kwargs) -> np.array:
+    def _smooth(self, temporal_prediction: np.array,
+                method: str = "smoothMovingAvg",
+                **kwargs) -> np.array:
         """ For smoothing the curve of the prediction curves.
 
         Args:
@@ -743,16 +747,16 @@ class Encoder:
 
         # Create smoother (select the algorithm)
         if method == _methods[0]:
-            smoother = self.__smooth_moving_avg
+            smoother = self._smooth_moving_avg
         elif method == _methods[1]:
-            smoother = self.__smooth_moving_median
+            smoother = self._smooth_moving_median
         else:
             return
 
         return smoother(temporal_prediction, **kwargs)
 
-    def __smooth_moving_median(self, temporal_prediction: np.array,
-                               window_len: int = 11, **kwargs):
+    def _smooth_moving_median(self, temporal_prediction: np.array,
+                              window_len: int = 11, **kwargs):
         """
         Args:
             temporal_prediction (np.array):
@@ -761,9 +765,9 @@ class Encoder:
         """
         raise NotImplementedError()
 
-    def __smooth_moving_avg(self, temporal_prediction: np.array,
-                            window_len: int = 5, padding: str = "same",
-                            **kwargs):
+    def _smooth_moving_avg(self, temporal_prediction: np.array,
+                           window_len: int = 5, padding: str = "same",
+                           **kwargs):
         """ Apply the smooth moving average on all class. Can be
         class-dependant or not.
 
