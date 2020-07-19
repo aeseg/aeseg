@@ -41,7 +41,7 @@ def eb_evaluator(y_true, y_pred,
     # Convert the data into dcase_util.containers.MetaDataContainer
     _y_true = convert_to_mdc(y_true)
     _y_pred = convert_to_mdc(y_pred)
-    
+
     # return _y_true.unique_files, _y_pred.unique_files
     return event_based_evaluation(_y_true, _y_pred,
                                   t_collar, percentage_of_length)
@@ -84,10 +84,12 @@ def event_based_evaluation(reference_event_list, estimated_event_list,
     for file in evaluated_files:
         reference_event_list_for_current_file = []
         # events = []
+        
         for event in reference_event_list:
             if event['filename'] == file:
                 reference_event_list_for_current_file.append(event)
                 # events.append(event.event_label)
+
         estimated_event_list_for_current_file = []
         for event in estimated_event_list:
             if event['filename'] == file:

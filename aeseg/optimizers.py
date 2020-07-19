@@ -8,27 +8,29 @@ import numpy as np
 import tqdm
 
 from Encoder import Encoder
-from aeseg import sb_evaluator, eb_evaluator
+from core import sb_evaluator, eb_evaluator
 
 
 def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
              y_true: np.array, y_pred: np.array, filenames: list) -> dict:
-    """Compute the segments using the given parameters and then compute all the
-    metrics using the sed_eval toolbox.
+    """ Complete evaluation of one combination of parameter using sed_eval.
 
     Args:
         combination (tuple):
+            The combination of parameter to use with the encode function
         keys (list):
+            The name of these parameters
         method (str):
+            The method to use with the encoder :py:meth:`Encoder.Encoder.encode`
         encoder (Encoder):
+            The encode use by the algorithm
         y_true (np.array):
+            The ground truth
         y_pred (np.array):
+            The prediction from the system
         filenames (list):
+            The name of each file in the same order that y_true and y_pred
     """
-    # Transform parameters from tuple to dictionary
-    # If only one parameter --> transform into tuple before
-    # if not isinstance(combination, list):
-    #    combination = [combination]
 
     combination = dict(
         zip(keys, combination)
@@ -55,25 +57,26 @@ def evaluate(combination: tuple, keys: list, method: str, encoder: Encoder,
 
 
 class Optimizer:
-    """The Dichotomous optimizer will search for the combination of parameters
-    that will lead to the best score. For each parameters that must be
-    optimized, a tuple is provided representing the range in between the
-    algorithm must search.
-
-    When the search is complete, the process is repeated in between to two
-    best combination of parameters in order to yields more accurate results.
-    """
-
     def __init__(self, param: dict, encoder: Encoder, step: int,
                  nb_recurse: int, nb_process: int = 4):
         """
+        Abstract class for the different optimizer available
+
+        .. seealso::
+            - :class:`optimizers.DichotomicOptimizer`
+            - :class:`optimizers.GenOptimizer`
+
         Args:
-            param (dict): The parameters that should be optimized.
-            encoder (Encoder): The encoder object that will be used to
-            step (int): In how many step the range should be divided.
-            nb_recurse (int): The number of recursion.
-            nb_process (int): The number of thread used for the optimization
-                process.
+            param (dict):
+                The parameters that should be optimized.
+            encoder (Encoder):
+                The encoder object that will be used to compute the score
+            step (int):
+                In how many step the range should be divided.
+            nb_recurse (int):
+                The number of recursion.
+            nb_process (int):
+                The number of processes used for the optimization.
         """
 
         self.param = param
@@ -103,13 +106,12 @@ class Optimizer:
         raise NotImplementedError
 
     def find(self, monitor: tuple, data: dict):
-        """Find the metric to monitor in the nested dictionary return by
-        the evaluator."""
+        """ Find the metric to monitor in the nested dictionary return by the evaluator.
+        """
         return functools.reduce(operator.getitem, monitor, data)
 
     def dict_nan_to_num(self, d: dict):
-        """For every np.nan within the dictionary and the nested dictionary,
-        will convert every nan to 0.0
+        """ For every np.nan within the dictionary and the nested dictionary, will convert every nan to 0.0.
         """
         for k in d:
             if isinstance(d[k], dict):
@@ -121,16 +123,25 @@ class Optimizer:
             monitor: tuple = ("class_wise_average", "f_measure", "f_measure"),
             verbose: int = 1,
             method: str = "threshold") -> dict:
-        """Initialize the thread pool and perform the optimization.*
+        """Initialize the thread pool and perform the optimization.
 
         Args:
-            y_true (np.array): The ground truth, Must be in one of the format
-            y_pred (np.array): The prediction that must be segmented by the
-            filenames (list): A list of filename in the same order than y_pred
-            monitor (str):
-            verbose (int): 0 --> No verbose at all, 1 --> tqdm terminal
-                progress, 2 --> tqdm notebook progress bar
+            y_true (np.array):
+                The ground truth, Must be in one of the format
+            y_pred (np.array):
+                The prediction that must be segmented by the
+            filenames (list):
+                A list of filename in the same order than y_pred
+            monitor (tuple):
+                The path to the metrics to monitor. Path to find it in the history dictionary
+            verbose (int):
+                - 0 : No verbose at all
+                - 1 : tqdm in terminal
+                - 2 : tqdm in notebook
             method (str):
+                the segmentation method to use for the optimization
+                .. seealso:: :meth:`Encoder.Encoder.encode`
+
         """
         self._y_true = y_true
         self._y_pred = y_pred
@@ -146,13 +157,11 @@ class Optimizer:
         if verbose == 2:
             self.progress = tqdm.tqdm_notebook(total=self.nb_iteration())
 
-
     @property
     def history(self) -> dict:
         """
-        Return the complete history of the optimization process, useful for
-        visualization of the optimization process. Work only if an optimization
-        process have been already done
+        Return the complete history of the optimization process, useful for visualization of the optimization process.
+        Work only if an optimization process have been already done.
 
         Returns:
             a list of dict, see sed_eval documentation for further detail
@@ -161,19 +170,16 @@ class Optimizer:
             raise RuntimeWarning("No optimization done yet")
         return self.results
 
-
     @property
     def best(self) -> tuple:
-
         """
-        Return the combination of parameters that yeld the best score using the
-        monitored metric
+        Return the combination of parameters that yield the best score using the monitored metric.
 
         Returns:
             tuple (parameters, score)
         """
         if not self.fitted:
-            raise RuntimeWarning("No optimization done yet")
+            raise RuntimeWarning("Optimization not perform yet")
 
         out = []
 
@@ -189,23 +195,61 @@ class Optimizer:
 
 
 class DichotomicOptimizer(Optimizer):
-    """The Dichotomous optimizer will search for the combination of parameters
-    that will lead to the best score. For each parameters that must be
-    optimized, a tuple is provided representing the range in between the
-    algorithm must search.
+    """ The dichotomous optimizer aims to drastically reduce the search time for the combination of parameters
+    that gives the best score.
 
-    When the search is complete, the process is repeated in between to two
-    best combination of parameters in order to yields more accurate results.
+    For each parameter that needs to be optimized, the user provides a search interval. Using a "step" parameter
+    defined at creation, the optimizer will then search for all possible combinations. The best combination is
+    selected, and new intervals are calculated. The optimizer then resumes its search in these new intervals.
+    The optimization stops when a fixed number of recursions specified at creation is reached.
     """
-    def __init__(self, param: dict, encoder: Encoder, step: int,
-                 nb_recurse: int, nb_process: int = 4):
+    def __init__(self, param: dict, encoder: Encoder, step: int, nb_recurse: int, nb_process: int = 4):
         """
         Args:
             param (dict):
+                The parameters that should be optimized.
             encoder (Encoder):
+                The encoder object that will be used to compute the score
             step (int):
+                In how many step the range should be divided.
             nb_recurse (int):
+                The number of recursion.
             nb_process (int):
+                The number of processes used for the optimization.
+
+        :Exemple:
+        To use the Dichotomous optimizer on the absolute threshold method, 3 step are needed.
+        - Define the list of class that are predicted by the system.
+        - Create an encoder with a specified temporal prediction and a minimum segmentatio separation.
+        - Create an optimizer that will use this encoder and perform best combination search.
+
+        .. code-block:: python
+
+            class_list = ['Alarm_bell_ringing', 'Speech', 'Dog', 'Cat', 'Vacuum_cleaner', 'Dishes', 'Frying', 'Electric_shaver_toothbrush', 'Blender', 'Running_water']
+
+            # Create the encoder that will be used
+            encoder = Encoder(
+                classes=class_list,
+                temporal_precision = 200,  # ms
+                clip_length = 10,          # s
+                minimal_segment_step = 200 # ms
+            )
+
+            parameter_to_optimize = {
+                    "threshold": (0.1, 0.9),
+                    "smooth": "smoothMovingAvg",
+                    "window_len": (5, 27)
+                }
+
+            optimizer = DichotomicOptimizer(
+                **parameter_to_optimize,
+                method="threshold",
+                encoder = encoder,
+
+                step = 6,
+                nb_recurse = 10,
+                nb_process = 20
+            )
         """
         super().__init__(param, encoder, step, nb_recurse, nb_process)
 
@@ -321,7 +365,7 @@ class DichotomicOptimizer(Optimizer):
 
             # Create all the combination
             search_space = self.param_to_range(_param)
-            all_combination = itertools.product(*search_space.values())
+            all_combination = itertools.product(*list(search_space.values()))
 
             # Add all combination to the thread pool
             works = []
