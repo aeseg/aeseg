@@ -5,3 +5,6 @@ dist
 docs
 .ipynb_checkpoints
 aeseg.egg-info
+build
+.idea/
+data
