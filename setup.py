@@ -1,17 +1,16 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+long_description = ""
 
 setuptools.setup(
-    name="sed_tool",
-    version="0.0.14",
+    name="aeseg",
+    version="0.0.18",
     author="Leo Cances",
     author_email="leo.cances@gmail.com",
-    description="A test package in python",
+    description="A python package for Sound Event Detection post-processing and optimization",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/sedtools/sed_tool.git",
+    url="https://github.com/aeseg/aeseg.git",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
